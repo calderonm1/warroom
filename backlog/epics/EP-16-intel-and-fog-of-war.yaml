@@ -1,0 +1,75 @@
+id: EP-16
+title: Intel and fog of war
+milestone: M2
+priority: P0
+summary: Vision sources, last-known information, contact identification, stealth and detectors, spies, and leak testing.
+docs: [docs/02-game-design/intel-and-fog-of-war.md, docs/03-architecture/security-and-anti-cheat.md]
+refs: [GDD-INT-003, NFR-SEC-001, RISK-010]
+labels: [gameplay, security]
+features:
+  - id: FE-16.1
+    title: Vision rules
+    summary: Vision ranges, last-known state, identification and stealth.
+    stories:
+      - id: ST-16.1.1
+        title: Vision ranges and last-known information
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to see only what my forces can see and remember the rest, so that scouting matters.
+        acceptance_criteria:
+          - Vision per GDD-INT-001; last-known state with age per GDD-INT-002; identification levels per GDD-INT-004.
+        docs: [docs/02-game-design/intel-and-fog-of-war.md]
+        refs: [GDD-INT-001, GDD-INT-002, GDD-INT-004]
+        depends_on: [ST-05.5.1]
+      - id: ST-16.1.2
+        title: Stealth and detectors
+        type: feature
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a player, I want stealth units and detectors, so that late-game intel has depth.
+        acceptance_criteria:
+          - Stealth visibility per GDD-INT-005.
+        docs: [docs/02-game-design/intel-and-fog-of-war.md]
+        refs: [GDD-INT-005]
+        depends_on: [ST-16.1.1]
+  - id: FE-16.2
+    title: Leak prevention
+    summary: Automated checks that hidden state never reaches clients.
+    stories:
+      - id: ST-16.2.1
+        title: Hidden-state leak test suite
+        type: test
+        status: draft
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want automated tests that inspect every outgoing message for hidden entities, so
+          that fog of war cannot be bypassed by modified clients.
+        acceptance_criteria:
+          - A test harness runs AI matches and asserts no serialized update contains entities outside the recipient's vision.
+        docs: [docs/03-architecture/security-and-anti-cheat.md]
+        refs: [NFR-SEC-001, GDD-INT-003]
+        depends_on: [ST-06.2.2, ST-16.1.1]
+  - id: FE-16.3
+    title: Spies
+    summary: Post-M2 espionage.
+    milestone: M4
+    stories:
+      - id: ST-16.3.1
+        title: Spy agents
+        type: feature
+        status: draft
+        priority: P3
+        size: M
+        story: >
+          As a player, I want to assign spies, so that I can learn or sabotage rival plans.
+        acceptance_criteria:
+          - Spy missions per GDD-INT-006.
+        docs: [docs/02-game-design/intel-and-fog-of-war.md]
+        refs: [GDD-INT-006]
+        depends_on: [ST-16.1.1]

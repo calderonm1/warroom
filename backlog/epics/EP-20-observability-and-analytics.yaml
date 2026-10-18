@@ -1,0 +1,75 @@
+id: EP-20
+title: Observability and analytics
+milestone: M3
+priority: P1
+summary: Logging standards enforcement, tracing, metrics, alerts, crash reporting, the telemetry event pipeline to Athena and KPI dashboards.
+docs: [docs/03-architecture/observability-and-analytics.md, docs/adr/0013-observability-otel-cloudwatch-sentry.md]
+refs: [ADR-0013]
+labels: [ops, analytics]
+features:
+  - id: FE-20.1
+    title: Operational observability
+    summary: Logs, traces, metrics, alerts and crash reporting.
+    stories:
+      - id: ST-20.1.1
+        title: Alarms, dashboards and Sentry
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As an operator, I want alarms on the golden signals and crash reports from clients and servers, so that I
+          learn about problems before players do.
+        acceptance_criteria:
+          - CloudWatch alarms for error rate, latency, match step lag and queue depth per env; Sentry for Unity and .NET.
+        docs: [docs/03-architecture/observability-and-analytics.md]
+        refs: [NFR-PERF-002, NFR-AVAIL-001]
+        depends_on: [ST-02.2.4]
+      - id: ST-20.1.2
+        title: Structured logging lint
+        type: test
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a reviewer, I want unstructured log calls rejected, so that every log line stays queryable by agents.
+        acceptance_criteria:
+          - An analyzer rejects string-interpolated log messages and logs without an event name on the server.
+        docs: [docs/05-conventions/logging-and-errors.md, docs/adr/0013-observability-otel-cloudwatch-sentry.md]
+        depends_on: [ST-02.2.4]
+  - id: FE-20.2
+    title: Telemetry pipeline
+    summary: Event schema, ingestion and the data lake.
+    stories:
+      - id: ST-20.2.1
+        title: Telemetry event schema and ingestion
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a product analyst, I want versioned telemetry events landing in S3 and queryable in Athena, so that
+          retention and balance questions can be answered.
+        acceptance_criteria:
+          - Events named wr.<domain>.<verb> validated against schemas; Firehose to partitioned Parquet in S3; Glue tables.
+          - No C3 or C4 data in telemetry.
+        docs: [docs/03-architecture/observability-and-analytics.md, docs/05-conventions/naming.md]
+        depends_on: [ST-03.3.4]
+  - id: FE-20.4
+    title: KPI dashboards
+    summary: Dashboards for vision KPIs.
+    stories:
+      - id: ST-20.4.1
+        title: Choose dashboard tool and build KPI dashboards
+        type: spike
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As the project owner, I want KPI dashboards, so that I can judge retention and monetization health.
+        acceptance_criteria:
+          - The choice between Amazon Managed Grafana and QuickSight is recorded in ADR-0013 or a new ADR.
+          - Dashboards cover KPI-01 to KPI-06 and infrastructure cost per DAU.
+        docs: [docs/adr/0013-observability-otel-cloudwatch-sentry.md, docs/00-product/vision.md]
+        refs: [KPI-01, KPI-02, KPI-03, KPI-04, KPI-05, KPI-06, NFR-COST-001]
+        depends_on: [ST-20.2.1]

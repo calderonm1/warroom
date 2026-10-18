@@ -1,0 +1,92 @@
+id: EP-21
+title: Monetization and store
+milestone: M4
+priority: P0
+summary: Fair-by-design store - cosmetics, Campaign Pass, Command Center subscription and casual-only Logistics Boost - with server-side receipt validation and enforced ranked neutrality.
+docs: [docs/02-game-design/monetization.md, docs/adr/0010-monetization-fair-by-design.md]
+refs: [ADR-0010, GDD-MON-002, RISK-009]
+labels: [monetization]
+features:
+  - id: FE-21.1
+    title: Purchases and receipts
+    summary: Store integration and server-side validation.
+    stories:
+      - id: ST-21.1.1
+        title: In-app purchase integration and receipt validation
+        type: feature
+        status: draft
+        priority: P0
+        size: L
+        story: >
+          As a player, I want purchases to work reliably on both stores, so that what I buy is always delivered.
+        acceptance_criteria:
+          - Unity IAP or native StoreKit 2 and Play Billing; server validates via App Store Server API and Play Developer API; refunds revoke per GDD-MON-004. Split before ready.
+        docs: [docs/02-game-design/monetization.md]
+        refs: [GDD-MON-001, GDD-MON-004]
+        depends_on: [ST-08.1.2]
+  - id: FE-21.2
+    title: Entitlements and fairness enforcement
+    summary: Entitlement service and the ranked-neutral guard.
+    stories:
+      - id: ST-21.2.1
+        title: Entitlement service
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a server developer, I want one entitlement service, so that every feature checks ownership the same way.
+        acceptance_criteria:
+          - Entitlements stored per account with source, expiry and revocation; exposed to grains via a cached interface.
+        docs: [docs/02-game-design/monetization.md]
+        depends_on: [ST-21.1.1]
+      - id: ST-21.2.3
+        title: Ranked-neutral guard
+        type: feature
+        status: draft
+        priority: P0
+        size: S
+        story: >
+          As a ranked player, I want a guarantee that nothing purchasable affects my matches, so that ranked is fair.
+        acceptance_criteria:
+          - The entitlement check rejects any purchasable effect in ranked match contexts and logs the attempt.
+          - The content schema forbids a purchasable flag on gameplay-affecting items; a test proves both.
+        docs: [docs/adr/0010-monetization-fair-by-design.md]
+        refs: [ADR-0010, GDD-RES-007, GDD-ECON-011]
+        depends_on: [ST-21.2.1]
+  - id: FE-21.3
+    title: Store UI and offers
+    summary: Store, pass and subscription screens.
+    stories:
+      - id: ST-21.3.1
+        title: Store and Campaign Pass screens
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want a clear store with real prices, so that I know exactly what I am buying.
+        acceptance_criteria:
+          - SCR-016 and SCR-017 with pending, failed and restored states; no prompts during combat (GDD-MON-003).
+        docs: [docs/04-ux/hud-and-screens.md, docs/02-game-design/monetization.md]
+        refs: [SCR-016, SCR-017, GDD-MON-003, GDD-PROG-021, GDD-PROG-022]
+        depends_on: [ST-21.2.1, ST-11.2.1]
+  - id: FE-21.4
+    title: Fairness monitoring
+    summary: Measure whether paid convenience affects outcomes.
+    stories:
+      - id: ST-21.4.2
+        title: Subscriber win-rate delta monitoring
+        type: feature
+        status: draft
+        priority: P1
+        size: S
+        milestone: M5
+        story: >
+          As the project owner, I want to measure whether Command Center perks change outcomes, so that I can move
+          perks to everyone if they do.
+        acceptance_criteria:
+          - A scheduled query compares skill-adjusted win rates of subscribers and non-subscribers and alerts if the delta exceeds 2%.
+        docs: [docs/02-game-design/monetization.md]
+        refs: [GDD-INT-007]
+        depends_on: [ST-20.2.1, ST-21.2.1]

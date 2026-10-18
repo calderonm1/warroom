@@ -1,0 +1,72 @@
+id: EP-19
+title: Notifications and check-in play
+milestone: M2
+priority: P0
+summary: Push notifications through FCM, notification preferences and quiet hours, the since-last-check-in briefing, next-event chip and rest mode.
+docs: [docs/02-game-design/core-loop.md, docs/adr/0019-push-notifications-fcm.md]
+refs: [ADR-0019, GDD-LOOP-005]
+labels: [engagement]
+features:
+  - id: FE-19.1
+    title: Check-in experience
+    summary: Briefing, next important event and rest mode.
+    stories:
+      - id: ST-19.1.1
+        title: Since-last-check-in briefing
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a returning player, I want a summary of what happened while I was away, so that I can react in seconds.
+        acceptance_criteria:
+          - SCR-006 per GDD-LOOP-001 built from SimEvents filtered by the nation's visibility.
+        docs: [docs/02-game-design/core-loop.md, docs/04-ux/hud-and-screens.md]
+        refs: [GDD-LOOP-001, SCR-006]
+        depends_on: [ST-05.2.4]
+      - id: ST-19.1.2
+        title: Rest mode
+        type: feature
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a player with a life, I want to declare rest hours, so that I am not punished for sleeping.
+        acceptance_criteria:
+          - Rest mode per GDD-LOOP-007.
+        docs: [docs/02-game-design/core-loop.md]
+        refs: [GDD-LOOP-007]
+        depends_on: [ST-05.4.2]
+  - id: FE-19.2
+    title: Push notifications
+    summary: Device registration, delivery and preferences.
+    stories:
+      - id: ST-19.2.1
+        title: Device registration and preferences
+        type: feature
+        status: draft
+        priority: P0
+        size: S
+        story: >
+          As a player, I want to choose which notifications I get and when, so that alerts are useful, not noise.
+        acceptance_criteria:
+          - Categories per GDD-LOOP-005 with quiet hours and per-match mute; permission pre-prompt per GDD-ONB-006.
+        docs: [docs/02-game-design/core-loop.md, docs/02-game-design/onboarding.md]
+        refs: [GDD-LOOP-005, GDD-ONB-006, SCR-018]
+        depends_on: [ST-08.1.2]
+      - id: ST-19.2.2
+        title: FCM delivery worker with dry-run integration test
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want timely alerts when I am attacked or my army arrives, so that I can check in at the
+          right moment.
+        acceptance_criteria:
+          - A worker consumes notification events from SQS, batches and dedupes them, and sends via FCM HTTP v1.
+          - CI runs an integration test with FCM validate_only mode.
+          - Delivery outcomes are logged and metered.
+        docs: [docs/adr/0019-push-notifications-fcm.md, docs/03-architecture/server-runtime.md]
+        refs: [ADR-0019]
+        depends_on: [ST-19.2.1]

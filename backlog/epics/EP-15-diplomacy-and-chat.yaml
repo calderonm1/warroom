@@ -1,0 +1,70 @@
+id: EP-15
+title: Diplomacy, coalitions and chat
+milestone: M3
+priority: P0
+summary: Coalitions, treaties, structured diplomatic proposals, chat channels, map pings and the world news feed.
+docs: [docs/02-game-design/diplomacy-and-coalitions.md]
+refs: [GDD-DIP-001]
+labels: [gameplay, social]
+features:
+  - id: FE-15.1
+    title: Coalitions and treaties
+    summary: Coalition lifecycle and treaty types.
+    stories:
+      - id: ST-15.1.1
+        title: Coalition lifecycle
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to form and manage a coalition, so that we can win together.
+        acceptance_criteria:
+          - Coalition caps, invites, leaving cooldowns, roles and victory rules per GDD-DIP-001 to GDD-DIP-004.
+        docs: [docs/02-game-design/diplomacy-and-coalitions.md]
+        refs: [GDD-DIP-001, GDD-DIP-002, GDD-DIP-003, GDD-DIP-004]
+        depends_on: [ST-05.2.2]
+      - id: ST-15.1.2
+        title: Treaties and structured proposals
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want to propose treaties with accept, decline and counter, so that diplomacy is clear and
+          enforceable.
+        acceptance_criteria:
+          - Treaty types per GDD-DIP-010; proposals per GDD-DIP-011; SCR-011 implemented.
+        docs: [docs/02-game-design/diplomacy-and-coalitions.md, docs/04-ux/hud-and-screens.md]
+        refs: [GDD-DIP-010, GDD-DIP-011, SCR-011]
+        depends_on: [ST-15.1.1]
+  - id: FE-15.2
+    title: Communication
+    summary: Chat, pings and news.
+    stories:
+      - id: ST-15.2.1
+        title: Chat channels with moderation hooks
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want match, coalition and private chat that is safe, so that I can coordinate without abuse.
+        acceptance_criteria:
+          - Channels, profanity filter, report, mute, block and rate limits per GDD-DIP-012; SCR-012 implemented.
+        docs: [docs/02-game-design/diplomacy-and-coalitions.md]
+        refs: [GDD-DIP-012, SCR-012]
+        depends_on: [ST-06.2.1]
+      - id: ST-15.2.2
+        title: Map pings and world news
+        type: feature
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a coalition member, I want pings and a daily news feed, so that I follow what matters.
+        acceptance_criteria:
+          - Pings per GDD-DIP-013 and the daily news feed per GDD-DIP-014 (SCR-013).
+        docs: [docs/02-game-design/diplomacy-and-coalitions.md]
+        refs: [GDD-DIP-013, GDD-DIP-014, SCR-013, GLB-008]
+        depends_on: [ST-15.1.1]

@@ -1,0 +1,265 @@
+id: EP-01
+title: AI-first foundation and repository
+milestone: M0
+priority: P0
+summary: >
+  Establish the repository, binding conventions, design docs, backlog-as-code and repo tooling so
+  that AI agents can pick up any story with full context and humans can follow progress on a board.
+outcome: >
+  `make check` is green, the backlog is synced to GitHub Projects, and an agent session can go from
+  "pick next story" to a reviewed PR using only repo content.
+docs: [AGENTS.md, docs/README.md, docs/05-conventions/ai-agent-workflow.md]
+refs: [ADR-0001, ADR-0002, ADR-0014, ADR-0015, BR-009]
+labels: [foundation]
+features:
+  - id: FE-01.1
+    title: Repository and agent operating manual
+    summary: Monorepo skeleton, AGENTS.md, Cursor rules and the founding documentation set.
+    docs: [AGENTS.md, docs/adr/0002-monorepo-layout.md]
+    stories:
+      - id: ST-01.1.1
+        title: Repository skeleton, AGENTS.md and Cursor rules
+        type: docs
+        status: done
+        priority: P0
+        size: M
+        story: >
+          As an AI agent, I want a single operating manual and always-on rules, so that I follow the
+          same workflow, precedence and hard rules in every session.
+        acceptance_criteria:
+          - AGENTS.md defines the source-of-truth hierarchy, repo map, workflow, Definition of Done and hard rules.
+          - "`.cursor/rules/` contains an always-applied core rule plus scoped rules for docs, C# and infra."
+          - "`.editorconfig`, `.gitignore` and `.gitattributes` (LFS and Unity YAML merge) exist at the root."
+          - Every top-level component folder has a README stating its purpose and the story that scaffolds it.
+        docs: [AGENTS.md, .cursor/rules/00-project-core.mdc]
+        refs: [ADR-0002]
+      - id: ST-01.1.2
+        title: Founding product, research, ADR, GDD, TDD and UX docs
+        type: docs
+        status: done
+        priority: P0
+        size: L
+        story: >
+          As the project owner, I want the product, game design, technical design and UX decisions written
+          down with permanent IDs, so that every later story can cite the rule it implements.
+        acceptance_criteria:
+          - Product vision, brief, glossary and naming docs exist under docs/00-product.
+          - ADR-0001 to ADR-0020 record the stack decisions with alternatives and consequences.
+          - GDD rules use GDD-<AREA>-NNN IDs; TDD rules use SIM-NNN and NFR-* IDs; screens use SCR-NNN.
+          - "`docs/README.md` links every doc."
+        docs: [docs/README.md, docs/adr/README.md]
+        refs: [ADR-0001]
+      - id: ST-01.1.3
+        title: Development conventions (naming, code, UI, testing, git)
+        type: docs
+        status: done
+        priority: P0
+        size: M
+        story: >
+          As an AI agent, I want binding conventions with checkable rule IDs, so that my code matches the
+          codebase without guessing.
+        acceptance_criteria:
+          - docs/05-conventions covers naming, C#, Unity, server, API, testing, git, docs, logging, security and AI workflow.
+          - Each rule has a CONV-<AREA>-NNN ID and names how it is enforced (tool or review).
+        docs: [docs/05-conventions/README.md]
+      - id: ST-01.1.4
+        title: Host repository on GitHub with branch protection
+        type: chore
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want the repo on GitHub with protected main and required checks, so that
+          CI, Projects sync and agent PRs work and nothing lands unreviewed.
+        acceptance_criteria:
+          - The repository exists on GitHub and `main` is pushed.
+          - Branch protection on main requires a PR, one approval (owner), linear history and the `repo-checks` status check.
+          - Repository variables WR_PROJECT_OWNER and WR_PROJECT_NUMBER and secret WR_PROJECTS_TOKEN are set (docs/06-environments/ci-cd.md).
+          - Secret scanning and push protection are enabled.
+        docs: [docs/06-environments/ci-cd.md, docs/05-conventions/git-and-review.md]
+        agent_notes: Human action. In the Cursor new-project flow, use the Create repo pill, then configure protection in GitHub settings.
+  - id: FE-01.2
+    title: Backlog as code
+    summary: YAML backlog with schema, validator, generated index and one-way GitHub Projects sync.
+    docs: [backlog/README.md, docs/adr/0014-backlog-as-code-github-projects.md]
+    refs: [ADR-0014]
+    stories:
+      - id: ST-01.2.1
+        title: Backlog schema, milestones and initial epics
+        type: docs
+        status: done
+        priority: P0
+        size: L
+        story: >
+          As an AI agent, I want the backlog as schema-validated YAML with permanent IDs, so that I can find,
+          read and update stories without an external tool.
+        acceptance_criteria:
+          - backlog/schema/backlog.schema.json validates every file in backlog/epics.
+          - EP-01 to EP-26 exist; M0 and M1 epics have ready or done stories with acceptance criteria.
+          - Every story ID referenced anywhere in docs exists in the backlog.
+        docs: [backlog/README.md, backlog/schema/backlog.schema.json]
+      - id: ST-01.2.2
+        title: Backlog CLI (validate, index, next)
+        type: feature
+        status: done
+        priority: P0
+        size: M
+        story: >
+          As an AI agent, I want commands that validate the backlog, regenerate the index and list startable
+          stories, so that I always work on unblocked, well-formed stories.
+        acceptance_criteria:
+          - Given an invalid file, when `make backlog-validate` runs, then it exits non-zero and prints file, ID and reason.
+          - The validator checks schema, unique IDs, ID prefixes match parents, depends_on targets exist, no dependency cycles, doc paths exist and refs are defined in docs/.
+          - "`make backlog-index` regenerates backlog/INDEX.md deterministically; `--check` fails when it is stale."
+          - "`make backlog-next` lists ready stories whose dependencies are done, ordered by milestone, priority and ID; `--json` emits machine-readable output."
+        docs: [tools/README.md]
+        depends_on: [ST-01.2.1]
+      - id: ST-01.2.3
+        title: One-way sync to GitHub Projects v2
+        type: feature
+        status: in-progress
+        priority: P1
+        size: M
+        story: >
+          As the project owner, I want the backlog mirrored as GitHub issues on a Projects board, so that I can
+          browse progress visually without the repo becoming a second source of truth.
+        acceptance_criteria:
+          - Given no token, when `make backlog-sync-plan` runs, then it prints planned creates and updates without network writes.
+          - "Each epic and story maps to one issue carrying the hidden marker `<!-- warroom-backlog-id: ID -->`; reruns update rather than duplicate."
+          - Project fields Status, Priority, Size, Milestone, Epic and Type are set from YAML.
+          - The backlog-sync workflow runs on pushes to main that touch backlog/.
+        docs: [docs/adr/0014-backlog-as-code-github-projects.md, docs/06-environments/ci-cd.md]
+        depends_on: [ST-01.2.2]
+        agent_notes: Implemented in tools/warroom_tools/github_sync.py with unit tests on the planning logic. Mark done after the first successful live sync (needs ST-01.1.4 and ST-01.2.4).
+      - id: ST-01.2.4
+        title: Create the GitHub Project board and fields
+        type: chore
+        status: ready
+        priority: P1
+        size: XS
+        story: >
+          As the project owner, I want a Projects v2 board with the fields the sync expects, so that the first
+          sync run populates a usable board.
+        acceptance_criteria:
+          - A user- or org-level project named "War Room" exists.
+          - Single-select fields exist with the options in tools/README.md (Status, Priority, Size, Milestone, Type) plus a text field Epic.
+          - Views exist for "Board by Status", "Roadmap by Milestone" and "Current milestone".
+          - "`make backlog-sync` completes against the board and the run is linked in ST-01.2.3 agent_notes."
+        docs: [tools/README.md]
+        depends_on: [ST-01.1.4]
+  - id: FE-01.3
+    title: Docs quality and agent tooling
+    summary: Automated doc checks, CI for repo checks, manifest validation and MCP configuration for agents.
+    docs: [docs/05-conventions/documentation.md, docs/06-environments/ai-environment-access.md]
+    stories:
+      - id: ST-01.3.1
+        title: Docs checker (front matter, links, index coverage, staleness)
+        type: feature
+        status: done
+        priority: P0
+        size: M
+        story: >
+          As an AI agent, I want broken links and missing front matter caught automatically, so that the docs I
+          rely on stay navigable and trustworthy.
+        acceptance_criteria:
+          - "`make docs-check` enforces CONV-DOC-001 to CONV-DOC-003 for every Markdown file under docs/."
+          - The ADR template is exempt from the date check.
+          - "`make docs-stale` lists docs whose last_reviewed is older than 180 days."
+        docs: [docs/05-conventions/documentation.md, tools/README.md]
+        refs: [CONV-DOC-001, CONV-DOC-002, CONV-DOC-003, CONV-DOC-009]
+      - id: ST-01.3.2
+        title: Repo checks workflow and PR template
+        type: infra
+        status: done
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want every PR checked for docs, backlog and tooling health and to follow a
+          template, so that agent PRs are consistently reviewable.
+        acceptance_criteria:
+          - .github/workflows/repo-checks.yml runs lint, tooling tests, docs-check, backlog-validate, index freshness and ops-validate.
+          - .github/pull_request_template.md asks for story ID, acceptance criteria evidence and doc updates.
+        docs: [docs/06-environments/ci-cd.md, docs/05-conventions/git-and-review.md]
+        depends_on: [ST-01.3.1, ST-01.2.2]
+      - id: ST-01.3.3
+        title: Configure MCP servers for agents
+        type: chore
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As an AI agent, I want MCP servers for AWS, CloudWatch, Sentry, GitHub and Unity configured with
+          read-only credentials, so that I can inspect environments without bespoke scripts.
+        acceptance_criteria:
+          - ops/mcp/mcp.example.json uses the current official AWS MCP server instead of the superseded aws-api server.
+          - Each server entry documents the profile or token scope it needs; no secrets are committed.
+          - A smoke prompt per server (list log groups in dev, list Sentry issues, list repo PRs) is documented and verified.
+        docs: [ops/mcp/README.md, docs/06-environments/ai-environment-access.md]
+        refs: [ADR-0018]
+        depends_on: [ST-01.1.4]
+      - id: ST-01.3.4
+        title: Environment manifest schema and validator
+        type: feature
+        status: done
+        priority: P0
+        size: S
+        story: >
+          As an AI agent, I want every environment described by a validated manifest, so that I know endpoints,
+          data classes and what I am allowed to do before touching anything.
+        acceptance_criteria:
+          - ops/environments/schema.json defines the manifest; local, dev, staging and prod manifests exist.
+          - "`make ops-validate` validates manifests and fails if prod allows agent deploys, infra applies or admin writes."
+        docs: [ops/README.md, docs/06-environments/ai-environment-access.md]
+        refs: [NFR-OPS-001, ADR-0018]
+  - id: FE-01.4
+    title: Naming, brand and legal identifiers
+    summary: Act on the naming review, reserve store names and fix permanent identifiers.
+    docs: [docs/00-product/naming-and-brand.md]
+    refs: [BR-001, RISK-006]
+    stories:
+      - id: ST-01.4.1
+        title: Trademark search and store name reservation
+        type: chore
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want the store title cleared and reserved early, so that a naming conflict does
+          not force a late rebrand.
+        acceptance_criteria:
+          - A trademark search for "War Room" in classes 9 and 41 (US, EU, UK) is completed, ideally by an attorney, and the outcome recorded in naming-and-brand.md.
+          - "The app name 'War Room: Global Theater' (or the chosen fallback) is reserved in App Store Connect and Google Play Console."
+          - The publishing entity is decided and recorded (individual or company, D-U-N-S if needed).
+        docs: [docs/00-product/naming-and-brand.md, docs/07-planning/open-questions.md]
+        refs: [OQ-005, OQ-008, RISK-006]
+        agent_notes: Human action; agents may prepare the search summary and store listing drafts.
+      - id: ST-01.4.2
+        title: Finalize bundle IDs and platform identifiers
+        type: chore
+        status: ready
+        priority: P0
+        size: XS
+        story: >
+          As a developer, I want permanent bundle and package IDs chosen before the first store upload, so that
+          builds, signing and deep links never need to change.
+        acceptance_criteria:
+          - The reverse-domain root is chosen and recorded in naming-and-brand.md.
+          - iOS bundle IDs and Android application IDs for prod, staging and dev variants are listed.
+          - The IDs are registered in the Apple Developer portal and Play Console.
+        docs: [docs/00-product/naming-and-brand.md]
+        refs: [OQ-006]
+        depends_on: [ST-01.4.1]
+      - id: ST-01.4.3
+        title: Register the project domain
+        type: chore
+        status: draft
+        priority: P1
+        size: XS
+        story: >
+          As the project owner, I want a domain for the website, API and support pages, so that certificates,
+          deep links and store listings have stable URLs.
+        acceptance_criteria:
+          - A domain is registered and delegated to Route 53 in the shared account.
+          - The domain is recorded in naming-and-brand.md and the env manifests' endpoints.
+        docs: [docs/00-product/naming-and-brand.md, docs/03-architecture/infrastructure-aws.md]
+        refs: [OQ-007]

@@ -1,0 +1,57 @@
+id: EP-14
+title: Research and doctrines
+milestone: M2
+priority: P1
+summary: Data-driven research tree with day-gating, research slots, costs, doctrines and the research UI.
+docs: [docs/02-game-design/research.md]
+refs: [GDD-RES-001]
+labels: [gameplay]
+features:
+  - id: FE-14.1
+    title: Research rules
+    summary: Tree, slots, day-gating, costs and doctrines.
+    stories:
+      - id: ST-14.1.1
+        title: Research tree, slots and day-gating
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to research technologies over the match, so that my nation's capabilities evolve.
+        acceptance_criteria:
+          - Research unlocks, day-gating, slots and costs per GDD-RES-001 to GDD-RES-004; coalition visibility per GDD-RES-006.
+          - Purchasable items never affect ranked research (GDD-RES-007).
+        docs: [docs/02-game-design/research.md]
+        refs: [GDD-RES-001, GDD-RES-002, GDD-RES-003, GDD-RES-004, GDD-RES-006, GDD-RES-007]
+        depends_on: [ST-05.4.2, ST-12.1.1]
+      - id: ST-14.1.2
+        title: Doctrines
+        type: feature
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As a player, I want to choose a doctrine, so that nations play differently.
+        acceptance_criteria:
+          - Doctrine choice at match start and one change after Day 10 per GDD-RES-005.
+        docs: [docs/02-game-design/research.md]
+        refs: [GDD-RES-005]
+        depends_on: [ST-14.1.1]
+  - id: FE-14.2
+    title: Research UI
+    summary: Research tree screen.
+    stories:
+      - id: ST-14.2.1
+        title: Research tree screen
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to browse and queue research on a phone, so that research is quick to manage.
+        acceptance_criteria:
+          - SCR-010 with locked (day-gated) states and queue management.
+        docs: [docs/04-ux/hud-and-screens.md]
+        refs: [SCR-010]
+        depends_on: [ST-14.1.1, ST-11.2.1]

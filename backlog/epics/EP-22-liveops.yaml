@@ -1,0 +1,58 @@
+id: EP-22
+title: LiveOps, seasons and progression
+milestone: M4
+priority: P1
+summary: Remote config and feature flags via AppConfig, seasons, Campaign Pass operations, commander level, service record and live events.
+docs: [docs/02-game-design/progression-and-seasons.md, docs/adr/0020-liveops-config-appconfig.md]
+refs: [ADR-0020, GDD-PROG-020]
+labels: [liveops]
+features:
+  - id: FE-22.1
+    title: Remote config
+    summary: AppConfig-backed config and flags.
+    stories:
+      - id: ST-22.1.1
+        title: Remote config and feature flags
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As an operator, I want to change config and flags without a release, so that I can tune and roll out
+          safely.
+        acceptance_criteria:
+          - AppConfig profiles per env with validators; server and client read flags through one interface with safe defaults.
+          - Gameplay-affecting values are pinned per match at creation.
+        docs: [docs/adr/0020-liveops-config-appconfig.md]
+        refs: [ADR-0020]
+        depends_on: [ST-03.3.3]
+  - id: FE-22.2
+    title: Seasons and progression
+    summary: Season rollover, commander level and service record.
+    stories:
+      - id: ST-22.2.1
+        title: Season rollover and operations
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want seasons with fresh goals, so that I have reasons to keep playing.
+        acceptance_criteria:
+          - Season schedule, rollover and operations per GDD-PROG-020 and GDD-PROG-021.
+        docs: [docs/02-game-design/progression-and-seasons.md]
+        refs: [GDD-PROG-020, GDD-PROG-021]
+        depends_on: [ST-22.1.1]
+      - id: ST-22.2.2
+        title: Commander level and service record
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want a level and service record, so that my history is visible.
+        acceptance_criteria:
+          - XP and level per GDD-PROG-001; medals and history per GDD-PROG-002; SCR-015.
+        docs: [docs/02-game-design/progression-and-seasons.md]
+        refs: [GDD-PROG-001, GDD-PROG-002, SCR-015]
+        depends_on: [ST-18.2.1]

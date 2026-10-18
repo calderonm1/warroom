@@ -1,0 +1,322 @@
+id: EP-02
+title: Dev environment and code scaffolding
+milestone: M1
+priority: P0
+summary: >
+  Pin the toolchain, scaffold the .NET server solution and the Unity client with enforced boundaries,
+  bring up the local stack, and set up device testing and Git LFS.
+outcome: >
+  A fresh machine reaches a running DevHost plus Unity client on an emulator using documented make
+  targets, and architecture boundaries are enforced by tests.
+docs: [docs/06-environments/local-development.md, docs/05-conventions/csharp-style.md, docs/05-conventions/unity.md]
+refs: [ADR-0002, ADR-0003, ADR-0004]
+labels: [foundation]
+features:
+  - id: FE-02.1
+    title: Toolchain pinning and checks
+    summary: Pinned SDK versions, a doctor command and pre-commit hooks.
+    milestone: M0
+    docs: [docs/06-environments/local-development.md]
+    stories:
+      - id: ST-02.1.1
+        title: Pin toolchain versions and add make doctor
+        type: chore
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As an AI agent on a new machine, I want one command that reports missing or wrong tool versions as
+          JSON, so that I can fix my environment before building.
+        acceptance_criteria:
+          - global.json pins the .NET 10 SDK; .tool-versions or equivalent pins Python, uv, Terraform and Node if used.
+          - "`make doctor` checks dotnet, uv, docker, terraform, git-lfs, buf and the Unity editor version, printing a table by default and JSON with `--json`."
+          - Given a missing tool, when doctor runs, then it exits non-zero and names the install doc section.
+        docs: [docs/06-environments/local-development.md]
+      - id: ST-02.1.2
+        title: Pre-commit hooks for format, lint and secrets
+        type: chore
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer, I want formatting, lint and secret scanning to run before commit, so that CI failures
+          for trivial issues disappear.
+        acceptance_criteria:
+          - A pre-commit config runs ruff, dotnet format (changed files), terraform fmt and gitleaks.
+          - "`make setup` installs the hooks; the hooks are documented in local-development.md."
+        docs: [docs/06-environments/local-development.md, docs/05-conventions/security-and-privacy.md]
+        depends_on: [ST-02.1.1]
+      - id: ST-02.1.3
+        title: Dev container for server and tooling work
+        type: chore
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a cloud AI agent, I want a dev container with the server toolchain, so that background agents can
+          build and test the server without manual setup.
+        acceptance_criteria:
+          - .devcontainer builds with .NET 10, uv, docker-in-docker, buf and Terraform.
+          - "`make check` and server tests pass inside the container."
+        docs: [docs/06-environments/local-development.md]
+        depends_on: [ST-02.1.1]
+  - id: FE-02.2
+    title: Server scaffold
+    summary: .NET solution, project per process role, shared build props, analyzers and architecture tests.
+    docs: [docs/03-architecture/server-runtime.md, docs/05-conventions/server.md]
+    refs: [ADR-0004]
+    stories:
+      - id: ST-02.2.1
+        title: .NET solution with Directory.Build.props and analyzers
+        type: chore
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a server developer, I want a solution with shared build settings and analyzers, so that every
+          project compiles with the same strictness from day one.
+        acceptance_criteria:
+          - server/WarRoom.sln exists with Directory.Build.props exactly as specified in csharp-style.md (nullable, warnings as errors, analyzers).
+          - Central package management (Directory.Packages.props) is enabled.
+          - "`make server-setup` restores packages and pulls docker images; `make server-test` runs an empty test project successfully."
+          - The server/README.md describes the layout.
+        docs: [docs/05-conventions/csharp-style.md, docs/05-conventions/server.md, server/README.md]
+        depends_on: [ST-02.1.1]
+      - id: ST-02.2.2
+        title: Process role projects with health endpoints
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As an operator, I want Gateway, Silo, Workers, Admin and Migrator as separate hosts sharing a
+          composition library, so that each can scale and deploy independently.
+        acceptance_criteria:
+          - Projects exist for WarRoom.Server.Gateway, .Silo, .Workers, .Admin, .Migrator and .DevHost.
+          - Each host exposes /health/live and /health/ready and logs a structured startup event with version and role.
+          - DevHost runs all roles in one process with an in-memory Orleans cluster.
+        docs: [docs/03-architecture/server-runtime.md]
+        depends_on: [ST-02.2.1]
+      - id: ST-02.2.3
+        title: Architecture tests for server boundaries
+        type: test
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a reviewer, I want dependency rules enforced by tests, so that grains never take on HTTP or ASP.NET
+          concerns and layering does not erode.
+        acceptance_criteria:
+          - NetArchTest rules assert WarRoom.Server.Grains does not reference ASP.NET Core or HTTP clients.
+          - WarRoom.Simulation references nothing from WarRoom.Server.
+          - Given a forbidden reference, when tests run, then the failure names the offending type.
+        docs: [docs/adr/0004-backend-dotnet-orleans.md, docs/05-conventions/server.md]
+        refs: [ADR-0004]
+        depends_on: [ST-02.2.2]
+      - id: ST-02.2.4
+        title: Structured logging and OpenTelemetry baseline
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As an AI agent debugging dev, I want every host to emit structured JSON logs and OTLP traces and metrics,
+          so that logs and traces are queryable from day one.
+        acceptance_criteria:
+          - Hosts log JSON with the standard fields from logging-and-errors.md (timestamp, level, event, trace_id, env, role).
+          - OTLP export is configurable by environment variables; locally it targets a collector in docker compose or is disabled.
+          - A test asserts a request produces a log line with a trace ID.
+        docs: [docs/05-conventions/logging-and-errors.md, docs/03-architecture/observability-and-analytics.md]
+        refs: [ADR-0013]
+        depends_on: [ST-02.2.2]
+  - id: FE-02.3
+    title: Client scaffold
+    summary: Unity 6 project with URP, assembly definitions, bootstrap and agent tooling.
+    docs: [docs/03-architecture/client-architecture.md, docs/05-conventions/unity.md]
+    refs: [ADR-0003]
+    stories:
+      - id: ST-02.3.1
+        title: Unity 6 LTS project with URP and core packages
+        type: chore
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a client developer, I want a Unity project with the pinned editor version and package set, so that
+          everyone and every CI runner builds the same client.
+        acceptance_criteria:
+          - client/ contains a Unity 6.3 LTS project with URP, Input System, UI Toolkit and Addressables; ProjectVersion.txt is committed.
+          - Assembly definitions exist per client-architecture.md layering (Core, Net, Globe, UI, App, Tests).
+          - "`make client-setup` verifies the editor version and resolves packages in batch mode."
+          - Android and iOS build targets are configured with IL2CPP and ARM64.
+        docs: [docs/03-architecture/client-architecture.md, docs/05-conventions/unity.md, client/README.md]
+        depends_on: [ST-02.1.1]
+      - id: ST-02.3.2
+        title: Bootstrap scene and composition root
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a client developer, I want a single bootstrap scene that composes services in code, so that game
+          logic stays out of MonoBehaviours and is testable.
+        acceptance_criteria:
+          - A Boot scene with a composition root builds services and loads the shell; no other scene is required to start.
+          - MonoBehaviours act only as adapters, per the unity conventions.
+          - An EditMode test constructs the composition root without a scene.
+        docs: [docs/03-architecture/client-architecture.md, docs/05-conventions/unity.md]
+        refs: [SCR-001]
+        depends_on: [ST-02.3.1]
+      - id: ST-02.3.3
+        title: EditMode test for assembly boundaries
+        type: test
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a reviewer, I want client assembly references checked automatically, so that UI never depends on
+          networking internals and the shared simulation stays engine-free.
+        acceptance_criteria:
+          - An EditMode test reads all .asmdef files and asserts the allowed reference graph from client-architecture.md.
+          - The shared simulation assembly has noEngineReferences set to true.
+        docs: [docs/adr/0003-client-engine-unity.md, docs/03-architecture/client-architecture.md]
+        depends_on: [ST-02.3.1]
+      - id: ST-02.3.4
+        title: Asset naming validator
+        type: test
+        status: ready
+        priority: P2
+        size: S
+        story: >
+          As a developer, I want asset names checked against the naming convention, so that agents and humans
+          can find assets by predictable names.
+        acceptance_criteria:
+          - An EditMode test (and CLI entry) checks asset prefixes from naming.md (M_, T_, UI_ and so on) under client/Assets/WarRoom.
+          - Violations list the path and the expected pattern.
+        docs: [docs/05-conventions/naming.md]
+        depends_on: [ST-02.3.1]
+      - id: ST-02.3.5
+        title: Unity CLI and MCP access for agents
+        type: chore
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As an AI agent, I want to run Unity tests and builds headlessly and inspect the editor through MCP, so
+          that I can verify client changes without a human clicking through the editor.
+        acceptance_criteria:
+          - "`make client-test` runs EditMode tests in batch mode and writes NUnit XML to a known path."
+          - The Unity MCP server is configured in ops/mcp and documented with a smoke prompt.
+        docs: [docs/05-conventions/unity.md, ops/mcp/README.md]
+        depends_on: [ST-02.3.1]
+  - id: FE-02.4
+    title: Local stack
+    summary: Docker-based dependencies and a single-process DevHost with hot reload.
+    docs: [docs/06-environments/local-development.md, ops/environments/local.yaml]
+    stories:
+      - id: ST-02.4.1
+        title: Docker compose for Postgres and Valkey
+        type: chore
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer, I want local Postgres and Valkey started by one command on uncommon ports, so that the
+          server runs locally without clashing with other projects.
+        acceptance_criteria:
+          - "`make dev-up` starts Postgres on 47432 and Valkey on 47379 with health checks; `make dev-down` stops them."
+          - .env.example lists every local variable with safe defaults and no secrets.
+          - ops/environments/local.yaml status becomes active and its endpoints match.
+        docs: [docs/06-environments/local-development.md, ops/environments/local.yaml]
+        depends_on: [ST-02.2.1]
+      - id: ST-02.4.2
+        title: DevHost with hot reload
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer, I want `make server-dev` to run gateway, silo and workers in one process with hot
+          reload, so that the inner loop is fast.
+        acceptance_criteria:
+          - "`make server-dev` starts DevHost on 47100 (gateway and meta) and 47101 (admin)."
+          - Code changes reload without restarting docker dependencies.
+          - The admin port only binds to localhost.
+        docs: [docs/06-environments/local-development.md, docs/03-architecture/server-runtime.md]
+        depends_on: [ST-02.2.2, ST-02.4.1]
+      - id: ST-02.4.3
+        title: Local seed data and dev match fixture
+        type: feature
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a developer, I want a command that creates a local dev match with bots, so that I can test the
+          client against a live match in seconds.
+        acceptance_criteria:
+          - "`make dev-seed` creates a guest account and a 16-slot match on the first map with AI nations."
+          - The command prints the match ID and a join deep link as JSON.
+        docs: [docs/06-environments/local-development.md]
+        depends_on: [ST-02.4.2, ST-06.1.3]
+  - id: FE-02.5
+    title: Device testing and large files
+    summary: Android emulators, iOS device path without a Mac, a reference Android device and Git LFS.
+    docs: [docs/06-environments/device-testing.md]
+    stories:
+      - id: ST-02.5.1
+        title: Android emulator profiles script
+        type: chore
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer without an Android phone, I want scripted emulator profiles for the reference and
+          minimum devices, so that I can test Android builds reproducibly.
+        acceptance_criteria:
+          - "`make android-avd` creates wr_pixel_api35 and wr_small_api29 if missing."
+          - The device-testing doc lists how to install and launch a development build on each AVD.
+        docs: [docs/06-environments/device-testing.md]
+        refs: [OQ-009]
+      - id: ST-02.5.2
+        title: iPhone development build path
+        type: chore
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer with an iPhone but no Mac, I want a documented way to get development builds on my
+          phone, so that M1 can be verified on real iOS hardware.
+        acceptance_criteria:
+          - The chosen path (macOS CI runner to TestFlight internal, or a rented cloud Mac) is documented with steps.
+          - A development build installs and launches on the owner's iPhone.
+        docs: [docs/06-environments/device-testing.md]
+        refs: [OQ-001, RISK-007]
+        depends_on: [ST-04.2.2]
+      - id: ST-02.5.3
+        title: Acquire a mid-range reference Android device
+        type: chore
+        status: draft
+        priority: P2
+        size: XS
+        story: >
+          As a developer, I want one real mid-range Android phone, so that GPU performance is measured on real
+          hardware rather than an emulator.
+        acceptance_criteria:
+          - A device in the recommended class from device-testing.md is acquired and listed as a reference device.
+        docs: [docs/06-environments/device-testing.md]
+        refs: [RISK-004]
+      - id: ST-02.5.4
+        title: Git LFS setup and budget monitoring
+        type: chore
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want LFS configured and its size monitored, so that binary assets do not
+          silently exhaust storage or slow clones.
+        acceptance_criteria:
+          - .gitattributes LFS patterns cover all binary asset types used by the client and the geodata bake.
+          - A scheduled job reports LFS storage and bandwidth and warns above a configurable threshold.
+          - ADR-0002's revisit threshold is referenced in the report.
+        docs: [docs/adr/0002-monorepo-layout.md, docs/06-environments/device-testing.md]
+        depends_on: [ST-01.1.4]

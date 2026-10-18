@@ -1,0 +1,118 @@
+id: EP-25
+title: Launch readiness
+milestone: M5
+priority: P0
+summary: Market re-research, store listings, prod activation, load tests, runbooks, incident drills and device smoke tests for soft and global launch.
+docs: [docs/07-planning/roadmap.md, docs/06-environments/device-testing.md]
+refs: [KPI-01, NFR-SCALE-001]
+labels: [launch]
+features:
+  - id: FE-25.1
+    title: Market and store
+    summary: Re-run research and prepare listings.
+    stories:
+      - id: ST-25.1.1
+        title: Re-run market research before soft launch
+        type: spike
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want updated genre and market research, so that launch decisions use current data.
+        acceptance_criteria:
+          - A new dated research doc updates every finding in the 2026-10 research and lists changed recommendations.
+        docs: [docs/01-research/2026-10-market-research.md]
+        refs: [OQ-003]
+      - id: ST-25.1.2
+        title: Store listings and assets
+        type: chore
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As the project owner, I want complete store listings, so that the game can be submitted in soft-launch markets.
+        acceptance_criteria:
+          - Title, subtitle, descriptions, screenshots, preview video, keywords and support URLs prepared for both stores in launch languages.
+        docs: [docs/00-product/naming-and-brand.md, docs/04-ux/voice-and-copy.md]
+        depends_on: [ST-01.4.1]
+  - id: FE-25.2
+    title: Operational readiness
+    summary: Load tests, device smoke tests, runbooks and drills.
+    stories:
+      - id: ST-25.2.1
+        title: Load test at twice target concurrency
+        type: test
+        status: draft
+        priority: P0
+        size: L
+        milestone: M4
+        story: >
+          As the project owner, I want the system load tested beyond launch targets, so that launch traffic does not
+          take it down.
+        acceptance_criteria:
+          - Bot clients simulate 2x target CCU across many matches on staging; p95 command ack within NFR-PERF-002. Split before ready.
+        docs: [docs/03-architecture/scalability-and-capacity.md]
+        refs: [NFR-SCALE-001, NFR-PERF-002]
+        depends_on: [ST-06.2.2]
+      - id: ST-25.2.2
+        title: Device farm smoke test against staging
+        type: test
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As the project owner, I want release candidates smoke tested on a matrix of real devices, so that
+          device-specific crashes are found before players do.
+        acceptance_criteria:
+          - Device Farm runs boot, connect to staging, open globe, pan and zoom, recording fps and memory per device.
+          - Results are attached to the release issue; failures block promotion.
+        docs: [docs/06-environments/device-testing.md]
+        refs: [NFR-PERF-001]
+        depends_on: [ST-09.5.2, ST-04.2.3]
+      - id: ST-25.2.3
+        title: Prod activation, runbooks and incident drills
+        type: infra
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As an operator, I want prod live with runbooks and rehearsed incidents, so that I can respond calmly when
+          things break.
+        acceptance_criteria:
+          - prod.yaml active; runbooks for outage, bad deploy, database failover and abuse spikes; one drill per runbook recorded.
+        docs: [docs/06-environments/README.md, ops/environments/prod.yaml]
+        refs: [NFR-AVAIL-001]
+        depends_on: [ST-04.3.3]
+  - id: FE-25.3
+    title: Global launch
+    summary: Go/no-go on soft-launch KPIs and the worldwide rollout.
+    milestone: M6
+    stories:
+      - id: ST-25.3.1
+        title: Global launch go/no-go and staged rollout
+        type: chore
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As the project owner, I want a KPI-based go/no-go and a staged worldwide rollout, so that launch scale
+          does not outrun the game's readiness.
+        acceptance_criteria:
+          - Soft-launch KPIs are compared against vision.md targets and the decision is recorded.
+          - Staged rollout percentages on Play and phased release on the App Store with capacity checks between stages.
+        docs: [docs/00-product/vision.md, docs/07-planning/roadmap.md]
+        refs: [KPI-01, KPI-02, KPI-03]
+        depends_on: [ST-25.2.3, ST-25.2.1]
+      - id: ST-25.3.2
+        title: Season 2 shipped as a content pack
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want new seasonal content without waiting for an app update, so that the game stays fresh.
+        acceptance_criteria:
+          - Season 2 content (map rotation, operations, cosmetics) ships via content pack and remote config with no binary release.
+        docs: [docs/02-game-design/progression-and-seasons.md, docs/02-game-design/content-model.md]
+        refs: [GDD-PROG-020, GDD-CONT-003]
+        depends_on: [ST-22.2.1]

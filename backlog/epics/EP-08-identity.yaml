@@ -1,0 +1,140 @@
+id: EP-08
+title: Identity and accounts
+milestone: M1
+priority: P0
+summary: >
+  Guest-first accounts with War Room session tokens (ES256, signed by KMS), then Sign in with Apple and
+  Google through Cognito, guest upgrade, and account deletion and export.
+outcome: >
+  A new player is in a match within a minute with no sign-up, can later link Apple or Google without
+  losing progress, and can delete their account in-app.
+docs: [docs/03-architecture/identity-and-accounts.md, docs/adr/0009-identity-cognito-plus-guest.md]
+refs: [ADR-0009, GDD-ONB-001, NFR-PRIV-001]
+labels: [identity]
+features:
+  - id: FE-08.1
+    title: Guest accounts and session tokens
+    summary: Device-bound guest accounts and first-party JWTs.
+    stories:
+      - id: ST-08.1.1
+        title: Guest account creation
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a new player, I want to start playing without creating an account, so that I reach the globe in under
+          a minute.
+        acceptance_criteria:
+          - POST /v1/auth/guest creates an account with a random device secret and returns tokens; rate limited per IP and device.
+          - The account row stores no PII.
+        docs: [docs/03-architecture/identity-and-accounts.md]
+        refs: [GDD-ONB-001]
+        depends_on: [ST-07.1.3, ST-06.4.1]
+      - id: ST-08.1.2
+        title: Session JWTs signed with KMS and JWKS endpoint
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a server developer, I want short-lived ES256 access tokens and rotating refresh tokens, so that
+          sessions are secure and verifiable by every service.
+        acceptance_criteria:
+          - Access tokens (15 min) are signed by a KMS asymmetric key; locally a file key is used.
+          - Refresh tokens rotate on use with reuse detection that revokes the family.
+          - /.well-known/jwks.json publishes public keys with key IDs; verification caches keys.
+        docs: [docs/03-architecture/identity-and-accounts.md, docs/05-conventions/security-and-privacy.md]
+        depends_on: [ST-08.1.1, ST-03.2.2]
+      - id: ST-08.1.3
+        title: Client secure token storage
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player, I want my session stored securely on the device, so that I stay signed in and nobody can
+          lift my account from app storage.
+        acceptance_criteria:
+          - Tokens are stored in the iOS Keychain and Android Keystore-backed storage through one client interface.
+          - The client refreshes tokens transparently and handles revoked sessions by returning to SCR-001.
+        docs: [docs/03-architecture/identity-and-accounts.md, docs/03-architecture/client-architecture.md]
+        depends_on: [ST-08.1.2, ST-02.3.2]
+  - id: FE-08.2
+    title: Federated sign-in
+    summary: Cognito with Apple and Google and guest upgrade.
+    milestone: M3
+    stories:
+      - id: ST-08.2.1
+        title: Cognito user pool with Sign in with Apple
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want to sign in with Apple, so that my account is safe and works across devices.
+        acceptance_criteria:
+          - Cognito Essentials user pool in Terraform with Apple as an identity provider.
+          - The server exchanges a Cognito token for War Room session tokens.
+        docs: [docs/03-architecture/identity-and-accounts.md]
+        depends_on: [ST-08.1.2]
+      - id: ST-08.2.2
+        title: Sign in with Google
+        type: feature
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As an Android player, I want to sign in with Google, so that I can use my existing account.
+        acceptance_criteria:
+          - Google configured as a Cognito identity provider; the same exchange flow works.
+        docs: [docs/03-architecture/identity-and-accounts.md]
+        depends_on: [ST-08.2.1]
+      - id: ST-08.2.3
+        title: Guest upgrade and account linking
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a guest, I want to link Apple or Google without losing progress, so that I can keep playing on another
+          device.
+        acceptance_criteria:
+          - Linking attaches the federated identity to the existing account; conflicts (identity already linked) show a clear choice.
+          - The link prompt follows GDD-ONB-005 timing.
+        docs: [docs/03-architecture/identity-and-accounts.md, docs/02-game-design/onboarding.md]
+        refs: [GDD-ONB-005]
+        depends_on: [ST-08.2.1]
+  - id: FE-08.3
+    title: Account lifecycle and privacy
+    summary: Deletion, export and session management.
+    milestone: M4
+    stories:
+      - id: ST-08.3.1
+        title: In-app account deletion
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to delete my account from settings, so that my data is removed as the stores and
+          privacy law require.
+        acceptance_criteria:
+          - SCR-018 offers deletion with confirmation; the account is anonymized in active matches and purged within the documented window.
+          - Store entitlements and subscriptions are explained before confirmation.
+        docs: [docs/03-architecture/identity-and-accounts.md, docs/05-conventions/security-and-privacy.md]
+        refs: [NFR-PRIV-001, SCR-018]
+        depends_on: [ST-08.1.2]
+      - id: ST-08.3.2
+        title: Personal data export
+        type: feature
+        status: draft
+        priority: P2
+        size: S
+        story: >
+          As a player, I want to request a copy of my data, so that I can exercise my privacy rights.
+        acceptance_criteria:
+          - A request produces a JSON export delivered via a time-limited link.
+        docs: [docs/05-conventions/security-and-privacy.md]
+        refs: [NFR-PRIV-001]
+        depends_on: [ST-08.1.2]

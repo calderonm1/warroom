@@ -1,0 +1,148 @@
+id: EP-13
+title: Military, movement and combat
+milestone: M2
+priority: P0
+summary: >
+  Unit roster, army composition, supply and fuel, engagements and combat rounds, air and naval
+  operations, standing orders, defensive automation and combat previews.
+docs: [docs/02-game-design/military-and-combat.md]
+refs: [GDD-MIL-010, GDD-MIL-011]
+labels: [gameplay, sim]
+features:
+  - id: FE-13.1
+    title: Ground combat
+    summary: Engagements, rounds, damage distribution and retreat.
+    stories:
+      - id: ST-13.1.1
+        title: Engagements and combat rounds
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want hostile armies to fight in rounds with predictable rules, so that I can plan attacks.
+        acceptance_criteria:
+          - Engagement start, round resolution, damage distribution, retreat and destruction per GDD-MIL-010 to GDD-MIL-013.
+          - Each rule has a test tagged with its ID.
+        docs: [docs/02-game-design/military-and-combat.md]
+        refs: [GDD-MIL-010, GDD-MIL-011, GDD-MIL-012, GDD-MIL-013]
+        depends_on: [ST-05.4.3]
+      - id: ST-13.1.2
+        title: Province capture
+        type: feature
+        status: draft
+        priority: P0
+        size: S
+        story: >
+          As a player, I want undefended provinces I occupy to become mine after the capture time, so that conquest
+          is meaningful.
+        acceptance_criteria:
+          - Capture timing and core versus occupied state per GDD-MAP-006 and GDD-MAP-007.
+        docs: [docs/02-game-design/map-and-territory.md]
+        refs: [GDD-MAP-006, GDD-MAP-007]
+        depends_on: [ST-13.1.1]
+      - id: ST-13.1.3
+        title: Combat preview
+        type: feature
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As a player, I want an odds band before attacking, so that I can make informed decisions.
+        acceptance_criteria:
+          - The shared simulation computes a preview from visible information only; the UI shows a band, not exact outcome.
+        docs: [docs/02-game-design/military-and-combat.md, docs/04-ux/globe-interaction.md]
+        refs: [GDD-MIL-014, GLB-007]
+        depends_on: [ST-13.1.1]
+  - id: FE-13.2
+    title: Logistics
+    summary: Supply attrition and fuel.
+    stories:
+      - id: ST-13.2.1
+        title: Supply and fuel
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want supply lines and fuel to matter, so that deep strikes need planning.
+        acceptance_criteria:
+          - Supply attrition per GDD-MIL-004 and fuel upkeep per GDD-MIL-005.
+        docs: [docs/02-game-design/military-and-combat.md]
+        refs: [GDD-MIL-004, GDD-MIL-005]
+        depends_on: [ST-13.1.1, ST-12.1.2]
+  - id: FE-13.3
+    title: Air, naval and special units
+    summary: Air missions, naval movement and blockade, air defence, EW and missiles.
+    stories:
+      - id: ST-13.3.1
+        title: Air missions and air defence
+        type: feature
+        status: draft
+        priority: P1
+        size: L
+        story: >
+          As a player, I want to fly patrol and strike missions and defend my airspace, so that air power matters.
+        acceptance_criteria:
+          - Missions and ranges per GDD-MIL-002; automatic air defence per GDD-MIL-015. Split before ready.
+        docs: [docs/02-game-design/military-and-combat.md]
+        refs: [GDD-MIL-002, GDD-MIL-015]
+        depends_on: [ST-13.1.1]
+      - id: ST-13.3.2
+        title: Naval movement and blockade
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want navies to control sea zones and blockade ports, so that coastal nations have strategy.
+        acceptance_criteria:
+          - Naval movement and blockade per GDD-MIL-003; embarking per GDD-MAP-004.
+        docs: [docs/02-game-design/military-and-combat.md]
+        refs: [GDD-MIL-003, GDD-MAP-004]
+        depends_on: [ST-13.1.1]
+      - id: ST-13.3.3
+        title: Electronic warfare and strategic missiles
+        type: feature
+        status: draft
+        priority: P2
+        size: M
+        story: >
+          As a late-game player, I want EW and missiles, so that modern warfare has depth.
+        acceptance_criteria:
+          - Rules per GDD-MIL-016 and GDD-MIL-017 within GDD-CONT-013 limits.
+        docs: [docs/02-game-design/military-and-combat.md, docs/02-game-design/content-model.md]
+        refs: [GDD-MIL-016, GDD-MIL-017, GDD-CONT-013]
+        depends_on: [ST-13.3.1]
+  - id: FE-13.4
+    title: Orders and automation
+    summary: Standing orders, defensive automation and the army sheet.
+    stories:
+      - id: ST-13.4.1
+        title: Standing orders and defensive automation
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a check-in player, I want armies and provinces to react sensibly while I am away, so that I do not lose
+          to someone who never sleeps.
+        acceptance_criteria:
+          - Standing orders per GDD-LOOP-003 and defensive automation per GDD-LOOP-004.
+        docs: [docs/02-game-design/core-loop.md]
+        refs: [GDD-LOOP-003, GDD-LOOP-004, GDD-LOOP-008]
+        depends_on: [ST-13.1.1]
+      - id: ST-13.4.2
+        title: Army sheet
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want an army sheet with units, orders and standing orders, so that I can manage forces
+          on a phone.
+        acceptance_criteria:
+          - SCR-008 implemented with in-combat, moving and idle states.
+        docs: [docs/04-ux/hud-and-screens.md]
+        refs: [SCR-008]
+        depends_on: [ST-13.4.1, ST-11.2.1]

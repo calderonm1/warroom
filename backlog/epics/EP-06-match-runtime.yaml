@@ -1,0 +1,215 @@
+id: EP-06
+title: Match runtime
+milestone: M1
+priority: P0
+summary: >
+  Orleans grains that host matches, accept commands, wake on scheduled events, fan out per-nation
+  updates, persist an event-sourced command log with snapshots, and support admin inspection and
+  replay export.
+outcome: >
+  A dev match survives silo restarts with no lost acknowledged commands, and any match can be replayed
+  locally from its bundle.
+docs: [docs/03-architecture/server-runtime.md, docs/03-architecture/data-and-persistence.md]
+refs: [ADR-0004, ADR-0016, NFR-AVAIL-001]
+labels: [server]
+features:
+  - id: FE-06.1
+    title: Match grain
+    summary: Hosting the simulation inside a grain with command intake and wake-up scheduling.
+    stories:
+      - id: ST-06.1.1
+        title: MatchGrain hosting the simulation
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a server developer, I want one grain per match that owns its state and serializes commands, so that
+          matches scale horizontally without locks.
+        acceptance_criteria:
+          - MatchGrain loads content and state on activation and exposes SubmitCommand returning an ack with sequence number or a typed error.
+          - Commands are validated and applied through the simulation pipeline; the grain contains no rule logic.
+          - Unit tests use the Orleans TestCluster.
+        docs: [docs/03-architecture/server-runtime.md, docs/05-conventions/server.md]
+        refs: [SIM-003, NFR-PERF-002]
+        depends_on: [ST-05.2.2, ST-02.2.2]
+      - id: ST-06.1.2
+        title: Wake-up scheduling
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As an operator, I want idle matches to sleep until their next event, so that thousands of slow matches
+          cost little compute.
+        acceptance_criteria:
+          - After each step the grain sets a timer for the next event's wall-clock time and a reminder as backup for deactivation.
+          - Given a match with no events for 6 hours, when observed, then the grain is deactivated and reactivates on time.
+        docs: [docs/03-architecture/server-runtime.md, docs/03-architecture/scalability-and-capacity.md]
+        refs: [SIM-015, NFR-SCALE-001]
+        depends_on: [ST-06.1.1]
+      - id: ST-06.1.3
+        title: Dev match creation endpoint
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer, I want an admin endpoint to create matches with given map, speed and bots, so that I can
+          test before matchmaking exists.
+        acceptance_criteria:
+          - POST on the admin API creates a match and returns its ID; disabled in prod by configuration.
+          - The endpoint is described in the OpenAPI spec.
+        docs: [docs/03-architecture/server-runtime.md, docs/05-conventions/api-and-contracts.md]
+        depends_on: [ST-06.1.1, ST-07.1.3]
+  - id: FE-06.2
+    title: Player sessions and fan-out
+    summary: WebSocket sessions bound to grains and per-nation update delivery.
+    stories:
+      - id: ST-06.2.1
+        title: Gateway WebSocket sessions
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want a persistent connection to my match, so that orders are acknowledged quickly and
+          updates arrive in real time.
+        acceptance_criteria:
+          - The gateway authenticates the session JWT, performs the protocol handshake and routes envelopes to the right grain.
+          - Per-connection rate limits and message size limits apply, with typed errors.
+          - Connection, disconnect and error events are logged with session and trace IDs.
+        docs: [docs/03-architecture/networking-and-protocol.md, docs/03-architecture/server-runtime.md]
+        refs: [NFR-PERF-002]
+        depends_on: [ST-07.2.1, ST-08.1.2, ST-06.1.1]
+      - id: ST-06.2.2
+        title: Per-nation update fan-out
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to receive only what my nation can see, so that the game is fair and modified clients
+          gain nothing.
+        acceptance_criteria:
+          - After each step the grain computes per-nation views and deltas and pushes them to connected sessions.
+          - An integration test asserts a hidden enemy army never appears in another nation's stream.
+        docs: [docs/03-architecture/networking-and-protocol.md, docs/03-architecture/security-and-anti-cheat.md]
+        refs: [GDD-INT-003, NFR-SEC-001]
+        depends_on: [ST-05.5.1, ST-06.2.1, ST-07.2.3]
+  - id: FE-06.3
+    title: Persistence and recovery
+    summary: Command log, snapshots and recovery with a chaos test.
+    stories:
+      - id: ST-06.3.1
+        title: Command log in Postgres
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As an operator, I want every accepted command persisted before it is acknowledged, so that no
+          acknowledged order is ever lost.
+        acceptance_criteria:
+          - Commands are appended to a match_commands table (match_id, seq, game_time, nation_id, payload) before ack.
+          - Writes are batched within a configurable window that stays within the RPO.
+          - Integration tests run against Postgres via Testcontainers.
+        docs: [docs/03-architecture/data-and-persistence.md]
+        refs: [NFR-AVAIL-001, ADR-0016]
+        depends_on: [ST-06.1.1, ST-06.4.1]
+      - id: ST-06.3.2
+        title: Snapshots to S3
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As an operator, I want periodic state snapshots, so that recovery replays only recent commands.
+        acceptance_criteria:
+          - Snapshots (canonical serialization, compressed) are written to S3 every N game hours and on deactivation, with the state hash in metadata.
+          - Snapshot pointers are stored in Postgres.
+        docs: [docs/03-architecture/data-and-persistence.md]
+        depends_on: [ST-06.3.1, ST-05.2.1]
+      - id: ST-06.3.3
+        title: Recovery on activation
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player, I want my match to continue exactly where it was after a server restart, so that outages do
+          not change outcomes.
+        acceptance_criteria:
+          - Activation loads the latest snapshot, replays later commands and verifies the hash at the snapshot boundary.
+          - A hash mismatch marks the match as quarantined and alerts; it does not continue silently.
+        docs: [docs/03-architecture/data-and-persistence.md]
+        refs: [SIM-006]
+        depends_on: [ST-06.3.2]
+      - id: ST-06.3.4
+        title: Chaos test - kill a silo mid-match
+        type: test
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want an automated test that kills a silo during a match, so that the recovery
+          claim in ADR-0016 is proven.
+        acceptance_criteria:
+          - A test cluster with two silos runs a scripted match; one silo is killed; the match resumes on the other.
+          - All acknowledged commands are present and the final hash equals an uninterrupted run.
+        docs: [docs/adr/0016-data-postgres-valkey-s3.md, docs/05-conventions/testing.md]
+        refs: [NFR-AVAIL-001]
+        depends_on: [ST-06.3.3]
+  - id: FE-06.4
+    title: Database migrations
+    summary: Migration tooling and the Migrator process.
+    stories:
+      - id: ST-06.4.1
+        title: Choose migration tool and implement Migrator
+        type: spike
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a server developer, I want one migration approach run by a one-shot task, so that schema changes are
+          versioned and applied safely before deploy.
+        acceptance_criteria:
+          - The choice (EF Core migrations or a SQL-first tool) is recorded as an ADR with rationale.
+          - WarRoom.Server.Migrator applies migrations idempotently locally and in CI; `make db-migrate` runs it locally.
+          - Migrations must be backward compatible with the previous release (expand then contract), documented in server.md.
+        docs: [docs/adr/0016-data-postgres-valkey-s3.md, docs/05-conventions/server.md]
+        depends_on: [ST-02.2.2, ST-02.4.1]
+  - id: FE-06.5
+    title: Admin inspection and replay
+    summary: Read-only admin endpoints and replay bundles for agents and humans.
+    docs: [docs/06-environments/ai-environment-access.md]
+    stories:
+      - id: ST-06.5.1
+        title: Admin read endpoints
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As an AI agent debugging dev, I want read-only endpoints for match summary, state hash and recent
+          events, so that I can inspect a match without database access.
+        acceptance_criteria:
+          - Admin API returns match summary, current hash, next wake-up and last N events as JSON; PII is redacted.
+          - Access requires the admin role; endpoints are in the OpenAPI spec.
+        docs: [docs/06-environments/ai-environment-access.md, docs/03-architecture/server-runtime.md]
+        depends_on: [ST-06.1.1, ST-07.1.3]
+      - id: ST-06.5.2
+        title: Replay bundle export and make replay
+        type: feature
+        status: ready
+        priority: P1
+        size: M
+        story: >
+          As a developer, I want to download any match as a replay bundle and run it locally with hash checks, so
+          that bugs reported in any environment are reproducible.
+        acceptance_criteria:
+          - The admin API exports a bundle (content pin, seed, commands, snapshot hashes) to S3 and returns a presigned URL.
+          - "`make replay MATCH=<id> ENV=<env>` downloads and replays it, reporting the first divergent step if any."
+        docs: [docs/06-environments/ai-environment-access.md, docs/03-architecture/data-and-persistence.md]
+        refs: [ADR-0018]
+        depends_on: [ST-06.3.2, ST-05.6.1]

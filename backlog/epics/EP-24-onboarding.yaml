@@ -1,0 +1,57 @@
+id: EP-24
+title: Onboarding and tutorial
+milestone: M4
+priority: P0
+summary: First-launch flow to the first command in 60 seconds, a tutorial operation, advisor tips and correctly timed prompts.
+docs: [docs/02-game-design/onboarding.md]
+refs: [GDD-ONB-001, KPI-01]
+labels: [onboarding]
+features:
+  - id: FE-24.1
+    title: First session
+    summary: Fast start and tutorial operation.
+    stories:
+      - id: ST-24.1.1
+        title: First launch to first command
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a new player, I want to give my first order within a minute of launch, so that I immediately understand
+          the game.
+        acceptance_criteria:
+          - Guest creation, nation pick and tutorial start within 60 seconds on the reference device (GDD-ONB-001), measured by telemetry.
+        docs: [docs/02-game-design/onboarding.md]
+        refs: [GDD-ONB-001]
+        depends_on: [ST-08.1.1]
+      - id: ST-24.1.2
+        title: Tutorial operation
+        type: feature
+        status: draft
+        priority: P0
+        size: L
+        story: >
+          As a new player, I want a short guided operation, so that I learn moving, capturing and producing.
+        acceptance_criteria:
+          - Tutorial per GDD-ONB-002 with SCR-019 overlay and a skip confirmation; follow-up options per GDD-ONB-003. Split before ready.
+        docs: [docs/02-game-design/onboarding.md, docs/04-ux/hud-and-screens.md]
+        refs: [GDD-ONB-002, GDD-ONB-003, SCR-019]
+        depends_on: [ST-24.1.1, ST-13.1.2]
+  - id: FE-24.2
+    title: Early-game guidance
+    summary: Advisor tips and prompt timing.
+    stories:
+      - id: ST-24.2.1
+        title: Advisor tips in the first real match
+        type: feature
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As a new player, I want occasional contextual tips, so that I learn without being nagged.
+        acceptance_criteria:
+          - Tips per GDD-ONB-004; account-link prompt timing per GDD-ONB-005.
+        docs: [docs/02-game-design/onboarding.md]
+        refs: [GDD-ONB-004, GDD-ONB-005]
+        depends_on: [ST-24.1.2]

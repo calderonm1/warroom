@@ -1,0 +1,27 @@
+# Machine-readable milestones. Human-readable version: docs/07-planning/roadmap.md
+# Milestones are capability gates, not dates.
+milestones:
+  - id: M0
+    title: Foundation
+    goal: An AI agent can pick up any story and work on it without asking for context.
+  - id: M1
+    title: Vertical slice
+    goal: Globe on device, one unit moving server-authoritatively, guest auth, dev deploy through CI.
+  - id: M2
+    title: Core gameplay vs bots
+    goal: A complete match against AI nations is playable and fun at 4x speed.
+  - id: M3
+    title: Multiplayer alpha
+    goal: Friends can play real 16 and 32 player matches with diplomacy and chat.
+  - id: M4
+    title: Closed beta
+    goal: Production-shaped game with store, live ops, moderation, onboarding and load tests.
+  - id: M5
+    title: Soft launch
+    goal: Validate retention and monetization in selected markets on prod.
+  - id: M6
+    title: Global launch and live ops
+    goal: Worldwide release and a sustainable season cadence.
+  - id: M7
+    title: Web client
+    goal: Browser players join the same matches as mobile players.

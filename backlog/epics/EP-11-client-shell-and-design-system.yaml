@@ -1,0 +1,136 @@
+id: EP-11
+title: Client shell and design system
+milestone: M1
+priority: P0
+summary: >
+  Design tokens generated into Unity USS, a reusable UI Toolkit component library with a gallery,
+  navigation, localization, safe areas and the in-match HUD skeleton.
+outcome: >
+  Every screen is built from tokenized components, passes contrast checks, has no hard-coded strings,
+  and adapts to phones, tablets and notches.
+docs: [docs/04-ux/design-system.md, docs/04-ux/hud-and-screens.md, docs/03-architecture/client-architecture.md]
+refs: [ADR-0003, RISK-015]
+labels: [client, ui]
+features:
+  - id: FE-11.1
+    title: Design system
+    summary: Tokens pipeline, contrast tests, components and gallery.
+    stories:
+      - id: ST-11.1.1
+        title: Design tokens to USS generator
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a UI developer, I want design/tokens.json generated into USS variables, so that colours, spacing and
+          motion are defined once.
+        acceptance_criteria:
+          - "`make tokens` generates client USS variables and a C# constants file from design/tokens.json."
+          - CI fails if generated files are stale.
+          - A lint rejects raw hex colours and pixel sizes in UXML and USS outside the generated files.
+        docs: [docs/04-ux/design-system.md, design/tokens.json]
+        depends_on: [ST-02.3.1]
+      - id: ST-11.1.2
+        title: Token contrast test
+        type: test
+        status: ready
+        priority: P1
+        size: XS
+        story: >
+          As a player with low vision, I want text and icons to meet contrast minimums, so that the UI is readable.
+        acceptance_criteria:
+          - A test computes contrast for every declared foreground and background token pair and fails below 4.5 to 1 for body and 3 to 1 for large text and icons.
+        docs: [docs/04-ux/accessibility-and-localization.md, design/tokens.json]
+        depends_on: [ST-11.1.1]
+      - id: ST-11.1.3
+        title: Component gallery dev screen
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer or agent, I want every component rendered in all states on one screen, so that visual
+          changes are easy to review and screenshot.
+        acceptance_criteria:
+          - SCR-020 lists each component with default, pressed, disabled, loading, empty and error variants.
+          - A batch-mode command captures gallery screenshots for PR review.
+        docs: [docs/04-ux/design-system.md, docs/04-ux/hud-and-screens.md]
+        refs: [SCR-020]
+        depends_on: [ST-11.1.4]
+      - id: ST-11.1.4
+        title: Core components
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a UI developer, I want buttons, chips, sheets, lists, toasts, dialogs and timers as components, so that
+          screens are assembled rather than hand-built.
+        acceptance_criteria:
+          - Components listed in design-system.md exist as UXML templates with USS and C# binding, each with an EditMode test.
+          - Touch targets meet the minimum size in accessibility-and-localization.md.
+        docs: [docs/04-ux/design-system.md, docs/04-ux/accessibility-and-localization.md]
+        depends_on: [ST-11.1.1]
+  - id: FE-11.2
+    title: App shell
+    summary: Navigation, localization, safe areas and HUD skeleton.
+    stories:
+      - id: ST-11.2.1
+        title: Screen navigation and state
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player, I want consistent navigation with back behaviour and transitions, so that the app feels native.
+        acceptance_criteria:
+          - A router manages screens and sheets as a stack with Android back handling and motion tokens.
+          - Each screen declares loading, empty and error states from hud-and-screens.md.
+        docs: [docs/03-architecture/client-architecture.md, docs/04-ux/hud-and-screens.md]
+        refs: [SCR-001, SCR-002]
+        depends_on: [ST-02.3.2, ST-11.1.4]
+      - id: ST-11.2.2
+        title: Localization and no-literal lint
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a translator, I want every string keyed and stored in content, so that the game can ship in many
+          languages without code changes.
+        acceptance_criteria:
+          - Strings load from content/localization/<lang>/*.yaml with plural and argument support.
+          - A lint fails on string literals assigned to UI text in code or UXML.
+          - A pseudo-locale doubles string length to test layout.
+        docs: [docs/04-ux/accessibility-and-localization.md, docs/04-ux/voice-and-copy.md]
+        depends_on: [ST-11.1.1]
+      - id: ST-11.2.3
+        title: Safe areas and responsive layout
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player on a notched phone or tablet, I want the HUD to fit my screen, so that nothing is hidden
+          behind the notch or stretched.
+        acceptance_criteria:
+          - Layouts respect safe areas and use breakpoints from tokens for phone portrait, phone landscape and tablet.
+          - Device simulator screenshots for the reference devices are produced by a batch command.
+        docs: [docs/04-ux/design-system.md, docs/06-environments/device-testing.md]
+        depends_on: [ST-11.1.4]
+      - id: ST-11.2.4
+        title: In-match HUD skeleton
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want the core HUD around the globe, so that I can see resources, time, alerts and the next
+          important event.
+        acceptance_criteria:
+          - SCR-005 layout with top bar (resources, game time, speed), next-event chip, alert tray and bottom sheet host.
+          - Connecting and resyncing states are shown.
+        docs: [docs/04-ux/hud-and-screens.md, docs/02-game-design/core-loop.md]
+        refs: [SCR-005, GDD-LOOP-006]
+        depends_on: [ST-11.2.1, ST-09.1.1]

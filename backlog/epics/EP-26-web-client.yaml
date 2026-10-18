@@ -1,0 +1,40 @@
+id: EP-26
+title: Web client
+milestone: M7
+priority: P2
+summary: A browser build of the Unity client (WebGL or WebGPU) sharing accounts, protocol and matches with mobile, with desktop input and web store considerations.
+docs: [docs/03-architecture/client-architecture.md, docs/04-ux/globe-interaction.md]
+refs: [ADR-0003, GLB-011, GDD-MON-005]
+labels: [web]
+features:
+  - id: FE-26.1
+    title: Web build
+    summary: Feasibility, build pipeline and hosting.
+    stories:
+      - id: ST-26.1.1
+        title: Web build feasibility spike
+        type: spike
+        status: draft
+        priority: P2
+        size: M
+        story: >
+          As the project owner, I want the web build's performance and size measured, so that the web client is
+          planned on facts.
+        acceptance_criteria:
+          - A WebGPU and a WebGL build of the globe scene are measured for size, load time and fps on reference browsers; results recorded in an ADR.
+        docs: [docs/03-architecture/client-architecture.md]
+        refs: [ADR-0003]
+        depends_on: [ST-09.5.2]
+      - id: ST-26.1.2
+        title: Desktop input and layout
+        type: feature
+        status: draft
+        priority: P2
+        size: M
+        story: >
+          As a desktop player, I want mouse, wheel and hotkeys, so that the web client feels native on a computer.
+        acceptance_criteria:
+          - Input mappings per GLB-011; layouts for wide screens.
+        docs: [docs/04-ux/globe-interaction.md]
+        refs: [GLB-011]
+        depends_on: [ST-26.1.1]

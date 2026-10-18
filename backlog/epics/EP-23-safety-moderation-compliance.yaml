@@ -1,0 +1,74 @@
+id: EP-23
+title: Safety, moderation and compliance
+milestone: M4
+priority: P0
+summary: Reporting and moderation tools, sanctions, privacy policy and store privacy labels, age rating and regional content compliance.
+docs: [docs/03-architecture/security-and-anti-cheat.md, docs/05-conventions/security-and-privacy.md]
+refs: [NFR-PRIV-001, GDD-CONT-015]
+labels: [safety, compliance]
+features:
+  - id: FE-23.1
+    title: Moderation
+    summary: Reports, review queue and sanctions.
+    stories:
+      - id: ST-23.1.1
+        title: Player reports and moderation queue
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a moderator, I want reports with context in a queue, so that abuse is handled quickly.
+        acceptance_criteria:
+          - Reports capture chat context and match ID; the admin tool lists, reviews and applies sanctions (mute, chat ban, suspension) with audit logs.
+        docs: [docs/03-architecture/security-and-anti-cheat.md]
+        refs: [GDD-DIP-012]
+        depends_on: [ST-15.2.1]
+  - id: FE-23.2
+    title: Anti-cheat signals
+    summary: Rate limits and anomaly detection.
+    stories:
+      - id: ST-23.2.1
+        title: Anomaly detection for automation and multi-accounting
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a fair player, I want bots and multi-accounters detected, so that matches stay honest.
+        acceptance_criteria:
+          - Telemetry-based heuristics flag inhuman command cadence and linked accounts in the same match for review.
+        docs: [docs/03-architecture/security-and-anti-cheat.md]
+        refs: [RISK-010]
+        depends_on: [ST-20.2.1]
+  - id: FE-23.3
+    title: Legal and privacy compliance
+    summary: Policies, labels and ratings.
+    stories:
+      - id: ST-23.3.1
+        title: Privacy policy, terms and store privacy labels
+        type: docs
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As the project owner, I want accurate privacy policy, terms and store privacy declarations, so that the
+          app passes review and respects players.
+        acceptance_criteria:
+          - docs/legal contains privacy policy, terms of service and the App Store and Play data safety declarations, reviewed by counsel.
+          - Declarations match actual telemetry and SDK data collection.
+        docs: [docs/03-architecture/security-and-anti-cheat.md, docs/05-conventions/security-and-privacy.md]
+        refs: [NFR-PRIV-001, OQ-010]
+      - id: ST-23.3.2
+        title: Age rating questionnaires and regional variants
+        type: chore
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want the target age rating and regional map rules handled, so that the game can be
+          sold where intended.
+        acceptance_criteria:
+          - IARC and App Store questionnaires completed for the GDD-CONT-015 target; regional map variant needs documented per GDD-CONT-014.
+        docs: [docs/02-game-design/content-model.md]
+        refs: [GDD-CONT-014, GDD-CONT-015, OQ-010]

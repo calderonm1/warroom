@@ -1,0 +1,77 @@
+id: EP-17
+title: AI nations
+milestone: M2
+priority: P0
+summary: Utility-based AI nations that play by the same rules, fill empty slots, take over inactive players and power automated playtests.
+docs: [docs/02-game-design/ai-nations.md]
+refs: [GDD-AI-001, RISK-005, RISK-014]
+labels: [gameplay, ai]
+features:
+  - id: FE-17.1
+    title: AI core
+    summary: Decision framework, personalities and budgets.
+    stories:
+      - id: ST-17.1.1
+        title: Utility AI framework inside the simulation
+        type: feature
+        status: draft
+        priority: P0
+        size: L
+        story: >
+          As a player, I want AI nations that play credibly without cheating, so that matches stay lively at any
+          population.
+        acceptance_criteria:
+          - AI issues only normal commands using its nation view (GDD-AI-001); planning on daily and economy ticks (GDD-AI-004).
+          - Budget of 2 ms per AI nation per economy tick is enforced by a benchmark (GDD-AI-006). Split before ready.
+        docs: [docs/02-game-design/ai-nations.md]
+        refs: [GDD-AI-001, GDD-AI-004, GDD-AI-006]
+        depends_on: [ST-13.1.1, ST-12.2.2]
+      - id: ST-17.1.2
+        title: Personalities and difficulty
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want AI nations with different personalities and difficulties, so that each match feels
+          different.
+        acceptance_criteria:
+          - Content-defined personalities per GDD-AI-002 and difficulty per GDD-AI-003.
+        docs: [docs/02-game-design/ai-nations.md]
+        refs: [GDD-AI-002, GDD-AI-003]
+        depends_on: [ST-17.1.1]
+  - id: FE-17.2
+    title: Inactivity and takeover
+    summary: Caretaker mode and human takeover of AI nations.
+    stories:
+      - id: ST-17.2.1
+        title: Inactivity caretaker and human takeover
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want inactive nations handled by AI and open slots joinable, so that abandoned nations do not
+          ruin matches.
+        acceptance_criteria:
+          - Inactivity switch per GDD-MATCH-004; takeover inherits state per GDD-AI-005.
+        docs: [docs/02-game-design/ai-nations.md, docs/02-game-design/match-lifecycle.md]
+        refs: [GDD-MATCH-004, GDD-AI-005, GDD-MATCH-003]
+        depends_on: [ST-17.1.1]
+  - id: FE-17.3
+    title: Automated playtests
+    summary: AI-only matches as soak and balance tests.
+    stories:
+      - id: ST-17.3.1
+        title: AI-only soak matches with balance telemetry
+        type: test
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a designer, I want AI-only matches run at high speed with balance reports, so that tuning uses data.
+        acceptance_criteria:
+          - A headless runner plays full matches and outputs win rates, unit usage and economy curves (GDD-AI-007).
+        docs: [docs/02-game-design/ai-nations.md]
+        refs: [GDD-AI-007]
+        depends_on: [ST-17.1.1, ST-05.6.1]

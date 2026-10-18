@@ -1,0 +1,125 @@
+id: EP-07
+title: Protocol and contracts
+milestone: M1
+priority: P0
+summary: >
+  Schema-first contracts - Protobuf envelopes over WSS for real-time play and OpenAPI for meta APIs -
+  with codegen for server and Unity, versioning, acknowledgements, deltas and reconnect.
+outcome: >
+  Client and server talk only through generated types; breaking changes are caught in CI; a dropped
+  connection resumes without a full reload.
+docs: [docs/03-architecture/networking-and-protocol.md, docs/05-conventions/api-and-contracts.md]
+refs: [ADR-0006]
+labels: [protocol]
+features:
+  - id: FE-07.1
+    title: Contract sources and codegen
+    summary: buf-managed Protobuf, OpenAPI spec and generated code.
+    stories:
+      - id: ST-07.1.1
+        title: Protobuf contracts with buf
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer, I want ClientEnvelope and ServerEnvelope defined in versioned Protobuf packages, so that
+          all real-time messages share one schema.
+        acceptance_criteria:
+          - shared/contracts/proto/warroom/realtime/v1 defines envelopes, handshake, command, ack, error and update messages.
+          - buf.yaml with lint and breaking rules; `make contracts-lint` passes.
+          - Naming follows api-and-contracts.md.
+        docs: [docs/05-conventions/api-and-contracts.md, docs/03-architecture/networking-and-protocol.md, shared/README.md]
+        depends_on: [ST-02.1.1]
+      - id: ST-07.1.2
+        title: C# codegen for server and Unity
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer, I want generated C# types for both runtimes from one command, so that hand-written DTOs
+          never drift.
+        acceptance_criteria:
+          - "`make contracts-gen` generates C# into the server and a Unity-compatible assembly; output is committed and marked generated."
+          - CI regenerates and fails on diff.
+        docs: [docs/05-conventions/api-and-contracts.md]
+        depends_on: [ST-07.1.1]
+      - id: ST-07.1.3
+        title: OpenAPI spec for meta and admin APIs
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As an AI agent, I want the HTTP APIs described in OpenAPI 3.1, so that I can call and test them without
+          reading server code.
+        acceptance_criteria:
+          - shared/contracts/openapi/warroom-meta.yaml and warroom-admin.yaml exist and pass Spectral with the repo ruleset.
+          - The server validates that registered endpoints match the spec in a test.
+        docs: [docs/05-conventions/api-and-contracts.md]
+        depends_on: [ST-07.1.1]
+  - id: FE-07.2
+    title: Real-time session semantics
+    summary: Handshake, acknowledgements, deltas and resume.
+    stories:
+      - id: ST-07.2.1
+        title: Handshake and version negotiation
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player on an old build, I want a clear "update required" message, so that I am not dropped into a
+          broken session.
+        acceptance_criteria:
+          - The client sends protocol version, build and content hashes; the server accepts, accepts with warning, or rejects with an upgrade-required code.
+          - The client shows SCR-001 upgrade state on rejection.
+        docs: [docs/03-architecture/networking-and-protocol.md, docs/04-ux/hud-and-screens.md]
+        refs: [SCR-001]
+        depends_on: [ST-07.1.2]
+      - id: ST-07.2.2
+        title: Command sequencing, acks and idempotency
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player on a flaky connection, I want resent commands applied once, so that retries never double my
+          orders.
+        acceptance_criteria:
+          - Commands carry a client sequence number; the server dedupes per session and returns the same ack for duplicates.
+          - Acks include the server sequence and game time.
+        docs: [docs/03-architecture/networking-and-protocol.md]
+        refs: [NFR-PERF-002]
+        depends_on: [ST-07.2.1]
+      - id: ST-07.2.3
+        title: Snapshot and delta updates
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a mobile player, I want compact incremental updates, so that the game uses little data and battery.
+        acceptance_criteria:
+          - The server sends a full nation-view snapshot on join and deltas afterwards, each with a view hash.
+          - The client detects a hash mismatch and requests a resync.
+          - A size test keeps the typical delta under the budget in networking-and-protocol.md.
+        docs: [docs/03-architecture/networking-and-protocol.md]
+        depends_on: [ST-07.2.1, ST-05.5.1]
+      - id: ST-07.2.4
+        title: Reconnect and resume
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a player switching networks, I want the app to reconnect and catch up automatically, so that I do not
+          have to reopen the match.
+        acceptance_criteria:
+          - The client reconnects with exponential backoff and jitter and resumes from its last acknowledged update sequence.
+          - If the gap is too large, the server sends a fresh snapshot.
+          - The HUD shows connecting and resyncing states (SCR-005).
+        docs: [docs/03-architecture/networking-and-protocol.md, docs/04-ux/hud-and-screens.md]
+        refs: [SCR-005]
+        depends_on: [ST-07.2.3]

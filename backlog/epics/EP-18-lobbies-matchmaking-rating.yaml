@@ -1,0 +1,73 @@
+id: EP-18
+title: Lobbies, matchmaking and rating
+milestone: M3
+priority: P0
+summary: Match queues by map, speed and mode, private matches, nation select, victory and results, and seasonal Glicko-2 rating.
+docs: [docs/02-game-design/match-lifecycle.md, docs/02-game-design/progression-and-seasons.md]
+refs: [GDD-MATCH-001, ADR-0011, RISK-005]
+labels: [meta]
+features:
+  - id: FE-18.1
+    title: Queues and lobbies
+    summary: Match finder, forming matches and nation selection.
+    stories:
+      - id: ST-18.1.1
+        title: Queue grain and forming matches
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want to join a queue and be placed in a forming match quickly, so that I start playing soon.
+        acceptance_criteria:
+          - QueueGrain per queue (map, speed, mode) forms matches per GDD-MATCH-001 and respects the active match limit (GDD-MATCH-002).
+          - SCR-003 and SCR-004 implemented, including the slot-taken race.
+        docs: [docs/02-game-design/match-lifecycle.md, docs/03-architecture/server-runtime.md]
+        refs: [GDD-MATCH-001, GDD-MATCH-002, SCR-003, SCR-004]
+        depends_on: [ST-06.1.1, ST-08.1.2]
+      - id: ST-18.1.2
+        title: Private matches with invite codes
+        type: feature
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As a player, I want to create a private match and invite friends, so that we can play together.
+        acceptance_criteria:
+          - Create with settings, share a code or deep link, and start when ready.
+        docs: [docs/02-game-design/match-lifecycle.md]
+        depends_on: [ST-18.1.1]
+  - id: FE-18.2
+    title: Victory and results
+    summary: Victory points, match end and results screen.
+    stories:
+      - id: ST-18.2.1
+        title: Victory conditions and results
+        type: feature
+        status: draft
+        priority: P0
+        size: M
+        story: >
+          As a player, I want clear victory conditions and a results screen, so that matches end satisfyingly.
+        acceptance_criteria:
+          - VP thresholds and end rules per GDD-MATCH-010 to GDD-MATCH-012; SCR-014 per GDD-MATCH-013.
+        docs: [docs/02-game-design/match-lifecycle.md]
+        refs: [GDD-MATCH-010, GDD-MATCH-011, GDD-MATCH-012, GDD-MATCH-013, SCR-014]
+        depends_on: [ST-05.4.2]
+  - id: FE-18.3
+    title: Rating
+    summary: Seasonal rating and divisions.
+    stories:
+      - id: ST-18.3.1
+        title: Glicko-2 rating and divisions
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a competitive player, I want a fair rating per season, so that ranked play means something.
+        acceptance_criteria:
+          - Rating per GDD-PROG-010, divisions per GDD-PROG-011, inactivity placement per GDD-PROG-012.
+        docs: [docs/02-game-design/progression-and-seasons.md]
+        refs: [GDD-PROG-010, GDD-PROG-011, GDD-PROG-012]
+        depends_on: [ST-18.2.1]

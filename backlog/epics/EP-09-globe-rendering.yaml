@@ -1,0 +1,215 @@
+id: EP-09
+title: Globe rendering
+milestone: M1
+priority: P0
+summary: >
+  A custom stylized globe renderer - province-ID cubemap plus a province data texture - with touch
+  interaction, overlays, unit icons, quality tiers and automated performance budgets on device.
+outcome: >
+  The 16-player map renders at 60 fps on the reference iPhone and 30 fps on the minimum Android
+  profile, with province picking and path previews.
+docs: [docs/03-architecture/globe-rendering.md, docs/adr/0012-globe-rendering-custom.md, docs/04-ux/globe-interaction.md]
+refs: [ADR-0012, NFR-PERF-001, RISK-004]
+labels: [client, globe]
+features:
+  - id: FE-09.1
+    title: Globe base
+    summary: Sphere, camera rig and province shading from textures.
+    stories:
+      - id: ST-09.1.1
+        title: Sphere mesh and camera rig
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want a smooth globe with zoom levels, so that I can view the world from orbit down to a
+          region.
+        acceptance_criteria:
+          - A cube-sphere mesh with LOD and a camera rig supporting zoom levels Z0 to Z3 with tilt at Z2 and Z3.
+          - Camera state is a plain C# model testable in EditMode.
+        docs: [docs/03-architecture/globe-rendering.md, docs/04-ux/globe-interaction.md]
+        refs: [GLB-002]
+        depends_on: [ST-02.3.2]
+      - id: ST-09.1.2
+        title: Province-ID cubemap shader
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want provinces coloured by owner with crisp borders, so that I can read control at a glance.
+        acceptance_criteria:
+          - A URP shader samples the province-ID cubemap (point filtering) and looks up colour in the province data texture.
+          - Borders are computed in-shader from ID discontinuities with width scaled by zoom.
+          - Colours come from design tokens (coalition palette).
+        docs: [docs/03-architecture/globe-rendering.md, docs/04-ux/design-system.md]
+        depends_on: [ST-09.1.1, ST-10.3.1]
+      - id: ST-09.1.3
+        title: Province data texture updates
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player, I want ownership changes to appear instantly, so that captures feel responsive.
+        acceptance_criteria:
+          - A province data texture (owner, flags, highlight) is updated incrementally from view deltas.
+          - Updating 64 provinces costs within NFR-PERF-001f.
+        docs: [docs/03-architecture/globe-rendering.md]
+        refs: [NFR-PERF-001f]
+        depends_on: [ST-09.1.2]
+  - id: FE-09.2
+    title: Interaction
+    summary: Gestures, picking and path preview.
+    docs: [docs/04-ux/globe-interaction.md]
+    stories:
+      - id: ST-09.2.1
+        title: Touch gestures (rotate, zoom, heading)
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want natural drag, pinch and twist gestures, so that navigating the globe feels effortless.
+        acceptance_criteria:
+          - One-finger drag rotates with inertia, pinch zooms, two-finger rotate changes heading with a north-up reset.
+          - Gesture recognition is unit tested with recorded touch sequences.
+        docs: [docs/04-ux/globe-interaction.md]
+        refs: [GLB-001, GLB-002, GLB-003, GLB-009]
+        depends_on: [ST-09.1.1]
+      - id: ST-09.2.2
+        title: Province and unit picking
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player, I want tapping a province or army to select it, so that I can inspect and give orders.
+        acceptance_criteria:
+          - Tap ray-sphere intersection converts to a cubemap lookup on the CPU copy of the ID map; units are picked first within a touch radius.
+          - Selection opens the province or army sheet in peek state.
+        docs: [docs/03-architecture/globe-rendering.md, docs/04-ux/globe-interaction.md]
+        refs: [GLB-004, GLB-005, SCR-007, SCR-008]
+        depends_on: [ST-09.1.2]
+      - id: ST-09.2.3
+        title: Path preview and confirm
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a player, I want to see the route and ETA before confirming a move, so that I never send an army by
+          accident.
+        acceptance_criteria:
+          - With an army selected, tapping a province shows the predicted path (shared simulation pathfinding) with ETA and a confirm button.
+          - Confirm sends MoveArmy; the path updates to server-acknowledged state.
+        docs: [docs/04-ux/globe-interaction.md]
+        refs: [GLB-006, GDD-LOOP-006]
+        depends_on: [ST-09.2.2, ST-05.3.3]
+  - id: FE-09.3
+    title: Overlays and icons
+    summary: Unit icons, labels and map modes.
+    stories:
+      - id: ST-09.3.1
+        title: Unit icons with clustering
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want readable army icons that cluster when zoomed out, so that the map stays legible.
+        acceptance_criteria:
+          - GPU-instanced icons with clustering by zoom level; movement interpolated along paths.
+          - Draw calls stay within NFR-PERF-001c with 500 visible armies.
+        docs: [docs/03-architecture/globe-rendering.md]
+        refs: [NFR-PERF-001c]
+        depends_on: [ST-09.1.1]
+      - id: ST-09.3.2
+        title: Labels for countries, provinces and cities
+        type: feature
+        status: draft
+        priority: P1
+        size: M
+        story: >
+          As a player, I want place names that appear by zoom level, so that I know where I am.
+        acceptance_criteria:
+          - Labels use localized names, fade by zoom and avoid overlap.
+        docs: [docs/03-architecture/globe-rendering.md, docs/04-ux/accessibility-and-localization.md]
+        depends_on: [ST-09.1.1, ST-11.2.2]
+      - id: ST-09.3.3
+        title: Map modes (political, terrain, supply)
+        type: feature
+        status: draft
+        priority: P2
+        size: S
+        milestone: M2
+        story: >
+          As a player, I want to switch map modes, so that I can plan around terrain and supply.
+        acceptance_criteria:
+          - Map mode switches the colour lookup without reloading textures.
+        docs: [docs/03-architecture/globe-rendering.md]
+        depends_on: [ST-09.1.2]
+  - id: FE-09.4
+    title: Visual polish and quality tiers
+    summary: Ocean, atmosphere, night side and per-device quality.
+    stories:
+      - id: ST-09.4.1
+        title: Stylized ocean, atmosphere and terminator
+        type: feature
+        status: draft
+        priority: P2
+        size: M
+        story: >
+          As a player, I want a beautiful but readable globe, so that the game feels premium.
+        acceptance_criteria:
+          - Ocean, atmosphere rim and optional day/night terminator within the GPU budget for each quality tier.
+        docs: [docs/03-architecture/globe-rendering.md, docs/04-ux/design-system.md]
+        refs: [RISK-015]
+        depends_on: [ST-09.1.2]
+      - id: ST-09.4.2
+        title: Quality tiers and device detection
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a player on an older phone, I want the game to pick settings that run smoothly, so that it stays
+          playable.
+        acceptance_criteria:
+          - Low, Medium and High tiers per globe-rendering.md quality settings; default chosen by device class; overridable in settings.
+        docs: [docs/03-architecture/globe-rendering.md]
+        refs: [NFR-PERF-001]
+        depends_on: [ST-09.1.2]
+  - id: FE-09.5
+    title: Performance budgets
+    summary: In-app metrics and automated on-device benchmarks.
+    stories:
+      - id: ST-09.5.1
+        title: Performance overlay and telemetry
+        type: feature
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer, I want frame time, draw calls and memory visible in dev builds and reported as telemetry,
+          so that regressions are spotted on any device.
+        acceptance_criteria:
+          - A dev overlay shows CPU and GPU frame time, draw calls and memory; sampled metrics are sent as telemetry in dev and staging.
+        docs: [docs/03-architecture/globe-rendering.md, docs/03-architecture/observability-and-analytics.md]
+        depends_on: [ST-09.1.2]
+      - id: ST-09.5.2
+        title: Automated on-device benchmarks
+        type: test
+        status: ready
+        priority: P1
+        size: M
+        story: >
+          As the project owner, I want a scripted benchmark run on reference devices, so that the performance
+          budgets are enforced rather than hoped for.
+        acceptance_criteria:
+          - A benchmark scene flies a fixed camera path and records frame-time percentiles and memory.
+          - CI runs it on the Android AVD and on Device Farm devices on demand, failing when budgets in globe-rendering.md are exceeded.
+        docs: [docs/adr/0012-globe-rendering-custom.md, docs/06-environments/device-testing.md]
+        refs: [NFR-PERF-001, NFR-PERF-001a, NFR-PERF-001b, NFR-PERF-001d]
+        depends_on: [ST-09.5.1, ST-04.2.1]

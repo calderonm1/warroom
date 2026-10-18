@@ -1,0 +1,339 @@
+id: EP-03
+title: Cloud environments and infrastructure as code
+milestone: M1
+priority: P0
+summary: >
+  Create the AWS multi-account organization, Terraform foundation, the dev environment services, cost
+  guardrails, drift detection and least-privilege access for CI and AI agents. Staging and prod reuse
+  the same modules and are applied in later milestones.
+outcome: >
+  Dev is fully described in Terraform, deployed by CI through OIDC, readable by agents with
+  wr-agent-readonly, and its manifest is active with real endpoints.
+docs: [docs/03-architecture/infrastructure-aws.md, docs/06-environments/aws-accounts-and-access.md, docs/06-environments/ai-environment-access.md]
+refs: [ADR-0007, ADR-0008, ADR-0018]
+labels: [infra]
+features:
+  - id: FE-03.1
+    title: Organization and Terraform bootstrap
+    summary: Accounts, human access, state backend, guardrail SCPs and budgets.
+    docs: [docs/06-environments/aws-accounts-and-access.md]
+    stories:
+      - id: ST-03.1.1
+        title: AWS Organization and member accounts
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want separate management, shared, dev, staging and prod accounts, so that
+          blast radius, billing and agent permissions are isolated per environment.
+        acceptance_criteria:
+          - The organization exists with OUs and the accounts named in aws-accounts-and-access.md, using the wr- naming.
+          - Root user MFA is enabled on every account; root access keys do not exist.
+          - Account IDs are recorded in the env manifests (they are not secrets).
+        docs: [docs/06-environments/aws-accounts-and-access.md, ops/environments/dev.yaml]
+        refs: [OQ-002]
+        agent_notes: Human action in the console for the management account; everything after this story is Terraform.
+      - id: ST-03.1.2
+        title: IAM Identity Center and permission sets
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want SSO with permission sets instead of IAM users, so that human access uses
+          short-lived credentials and named profiles.
+        acceptance_criteria:
+          - Identity Center is enabled; permission sets for admin, developer and read-only are defined in Terraform.
+          - aws-accounts-and-access.md lists the CLI profile names and `aws sso login` usage.
+          - No IAM users with access keys exist outside break-glass, which is documented.
+        docs: [docs/06-environments/aws-accounts-and-access.md]
+        depends_on: [ST-03.1.1]
+      - id: ST-03.1.3
+        title: Terraform state backend and repo layout
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As an infrastructure developer, I want encrypted remote state per environment and a module layout, so
+          that plans are reproducible and environments share modules.
+        acceptance_criteria:
+          - An S3 state bucket with versioning, KMS encryption and native S3 lockfile locking exists in the shared account.
+          - infra/ contains modules/, envs/dev, envs/staging, envs/prod and a bootstrap stack, following ADR-0008.
+          - "`make infra-plan ENV=dev` runs a plan using the developer profile."
+        docs: [docs/adr/0008-iac-terraform.md, infra/README.md]
+        refs: [ADR-0008]
+        depends_on: [ST-03.1.2]
+      - id: ST-03.1.4
+        title: Budgets, anomaly detection and dev scale-to-zero
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want spending alerts and automatic dev shutdown outside working hours, so that
+          pre-revenue costs stay within the budget.
+        acceptance_criteria:
+          - AWS Budgets per account alert at 50%, 80% and 100% of the configured ceiling to the owner's email.
+          - Cost Anomaly Detection is enabled for the organization.
+          - Dev ECS services scale to zero on a schedule and Aurora uses its minimum capacity setting; the schedule is configurable.
+        docs: [docs/adr/0007-cloud-aws.md, docs/03-architecture/infrastructure-aws.md]
+        refs: [NFR-COST-001, RISK-008, OQ-002]
+        depends_on: [ST-03.1.3]
+      - id: ST-03.1.5
+        title: Baseline service control policies
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want organization guardrails, so that mistakes cannot disable logging, leave
+          the org or create resources in unapproved regions.
+        acceptance_criteria:
+          - SCPs deny leaving the organization, disabling CloudTrail or Config, root usage and non-approved regions.
+          - The approved regions list is defined once and referenced by the env manifests.
+        docs: [docs/06-environments/aws-accounts-and-access.md, docs/03-architecture/security-and-anti-cheat.md]
+        depends_on: [ST-03.1.3]
+  - id: FE-03.2
+    title: Network and shared services
+    summary: VPC, registries, keys, secrets and DNS.
+    docs: [docs/03-architecture/infrastructure-aws.md]
+    stories:
+      - id: ST-03.2.1
+        title: VPC module
+        type: infra
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As an infrastructure developer, I want a reusable VPC module, so that every environment has the same
+          network shape at a cost-appropriate size.
+        acceptance_criteria:
+          - Public, private and isolated subnets across the AZ count configured per env.
+          - Dev avoids NAT gateway cost (VPC endpoints or a single NAT, per infrastructure-aws.md).
+          - VPC flow logs are enabled to CloudWatch with retention per env.
+        docs: [docs/03-architecture/infrastructure-aws.md]
+        depends_on: [ST-03.1.3]
+      - id: ST-03.2.2
+        title: ECR, KMS keys and Secrets Manager baseline
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer, I want container registries, encryption keys and secret slots in place, so that
+          services can be built, signed and configured without manual steps.
+        acceptance_criteria:
+          - ECR repositories for each server image with scan on push and lifecycle rules.
+          - KMS keys for data, state and the ES256 session signing key (asymmetric, sign/verify only).
+          - Secrets Manager entries are created empty with names from secrets.md; values are set out of band.
+        docs: [docs/06-environments/secrets.md, docs/03-architecture/identity-and-accounts.md]
+        refs: [ADR-0009]
+        depends_on: [ST-03.1.3]
+      - id: ST-03.2.3
+        title: DNS and certificates
+        type: infra
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As a developer, I want per-environment hostnames with TLS, so that clients connect to stable URLs.
+        acceptance_criteria:
+          - Route 53 hosted zones for the domain and delegated subdomains per env.
+          - ACM certificates for api and ws hostnames; endpoints recorded in manifests.
+        docs: [docs/03-architecture/infrastructure-aws.md]
+        refs: [OQ-007]
+        depends_on: [ST-01.4.3, ST-03.2.1]
+  - id: FE-03.3
+    title: Dev environment services
+    summary: Database, cache, compute, load balancing and storage for dev.
+    docs: [docs/03-architecture/infrastructure-aws.md, docs/03-architecture/data-and-persistence.md]
+    stories:
+      - id: ST-03.3.1
+        title: Aurora PostgreSQL Serverless v2 for dev
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a server developer, I want a managed Postgres in dev, so that persistence code runs against the
+          same engine as prod.
+        acceptance_criteria:
+          - Aurora PostgreSQL Serverless v2 in isolated subnets with IAM auth and KMS encryption.
+          - Credentials are in Secrets Manager with rotation; min and max ACUs are configurable per env.
+        docs: [docs/03-architecture/data-and-persistence.md, docs/adr/0016-data-postgres-valkey-s3.md]
+        refs: [ADR-0016]
+        depends_on: [ST-03.2.1, ST-03.2.2]
+      - id: ST-03.3.2
+        title: ElastiCache Valkey for dev
+        type: infra
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a server developer, I want Valkey for presence, rate limits and queues, so that dev matches the
+          prod caching layer.
+        acceptance_criteria:
+          - ElastiCache Valkey (serverless or smallest node for dev) with TLS and auth.
+          - Endpoint recorded in the dev manifest.
+        docs: [docs/03-architecture/data-and-persistence.md]
+        depends_on: [ST-03.2.1]
+      - id: ST-03.3.3
+        title: ECS Fargate cluster, ALB and services
+        type: infra
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As an operator, I want gateway, silo and workers running on ECS Fargate (Graviton) behind an ALB, so
+          that the server is reachable over WSS and HTTPS.
+        acceptance_criteria:
+          - ECS cluster with services per role, ARM64 task definitions and autoscaling bounds per env.
+          - ALB with HTTPS listeners, WebSocket idle timeout suited to long sessions, and WAF attached.
+          - Silo-to-silo clustering works (Orleans membership in Postgres) across tasks.
+          - Health checks use /health/ready.
+        docs: [docs/03-architecture/infrastructure-aws.md, docs/03-architecture/server-runtime.md]
+        depends_on: [ST-03.2.1, ST-03.2.2, ST-02.2.2]
+      - id: ST-03.3.4
+        title: S3 buckets and CloudFront for content
+        type: infra
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer, I want buckets for snapshots, replays, telemetry and client content with a CDN, so
+          that persistence and Addressables delivery work in dev.
+        acceptance_criteria:
+          - Buckets with encryption, block public access, lifecycle rules and names following wr-<env>- naming.
+          - CloudFront distribution with origin access control serving the content bucket.
+        docs: [docs/03-architecture/data-and-persistence.md, docs/05-conventions/naming.md]
+        depends_on: [ST-03.1.3]
+  - id: FE-03.4
+    title: Drift and compliance
+    summary: Tagging, baseline security services and drift detection.
+    docs: [docs/adr/0008-iac-terraform.md]
+    stories:
+      - id: ST-03.4.1
+        title: Tagging and module conventions
+        type: infra
+        status: ready
+        priority: P1
+        size: XS
+        story: >
+          As an AI agent reading AWS, I want every resource tagged consistently, so that I can attribute
+          resources and costs to an environment, service and story.
+        acceptance_criteria:
+          - Provider default tags set project=warroom, env, service, managed_by=terraform and repo.
+          - A tflint or checkov rule fails resources missing required tags.
+        docs: [docs/05-conventions/naming.md, docs/adr/0008-iac-terraform.md]
+        depends_on: [ST-03.1.3]
+      - id: ST-03.4.2
+        title: Security baseline (CloudTrail, Config, GuardDuty, Security Hub)
+        type: infra
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want organization-wide audit and threat detection, so that misconfigurations
+          and compromises are detected.
+        acceptance_criteria:
+          - Organization CloudTrail to a log archive bucket in the shared account.
+          - AWS Config, GuardDuty and Security Hub enabled with findings aggregated in the shared account.
+        docs: [docs/03-architecture/security-and-anti-cheat.md]
+        refs: [NFR-SEC-001]
+        depends_on: [ST-03.1.5]
+      - id: ST-03.4.3
+        title: Nightly drift detection
+        type: infra
+        status: draft
+        priority: P2
+        size: S
+        milestone: M3
+        story: >
+          As an operator, I want nightly plans against staging and prod, so that manual changes are detected
+          before they cause incidents.
+        acceptance_criteria:
+          - A scheduled workflow runs read-only plans for staging and prod and opens or updates an issue on drift.
+        docs: [docs/adr/0008-iac-terraform.md, docs/06-environments/ci-cd.md]
+        depends_on: [ST-04.3.1]
+  - id: FE-03.5
+    title: CI and agent access
+    summary: OIDC roles for CI, read-only and dev-deployer roles for agents, SCP proofs and agent tooling.
+    docs: [docs/06-environments/ai-environment-access.md, docs/adr/0018-ai-environment-access.md]
+    refs: [ADR-0018, NFR-OPS-001, RISK-013]
+    stories:
+      - id: ST-03.5.1
+        title: GitHub OIDC roles for CI
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want CI to assume per-environment roles via OIDC, so that no long-lived AWS
+          keys exist in GitHub.
+        acceptance_criteria:
+          - GitHub OIDC provider and roles per env with trust conditions on repo, branch or tag and environment.
+          - Plan roles are read-only; apply roles are restricted to the infra and deploy workflows.
+        docs: [docs/06-environments/ci-cd.md, docs/06-environments/aws-accounts-and-access.md]
+        depends_on: [ST-03.1.3, ST-01.1.4]
+      - id: ST-03.5.2
+        title: Agent roles wr-agent-readonly and wr-agent-deployer
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As an AI agent, I want a read-only role in every environment and a deployer role in dev only, so that I
+          can investigate anywhere and change only dev.
+        acceptance_criteria:
+          - wr-agent-readonly can read logs, metrics, traces, ECS, and the redacted agent views; it cannot read secrets or C3/C4 data.
+          - wr-agent-deployer exists only in dev and can deploy services and run admin writes there.
+          - Role ARNs and profiles are recorded in the env manifests.
+        docs: [docs/06-environments/ai-environment-access.md, ops/environments/schema.json]
+        depends_on: [ST-03.1.2]
+      - id: ST-03.5.3
+        title: Prove agents cannot write in prod
+        type: test
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want an automated test that agent roles cannot mutate prod, so that the
+          AI-access model is verified rather than assumed.
+        acceptance_criteria:
+          - An SCP denies write actions for wr-agent-* principals in the prod account.
+          - A test uses the IAM policy simulator and Access Analyzer to assert denies for a list of representative write actions.
+          - The test runs in the infra workflow and nightly.
+        docs: [docs/adr/0018-ai-environment-access.md]
+        refs: [ADR-0018, RISK-013]
+        depends_on: [ST-03.5.2]
+      - id: ST-03.5.4
+        title: Agent environment commands (env-status, logs)
+        type: feature
+        status: ready
+        priority: P1
+        size: M
+        story: >
+          As an AI agent, I want `make env-status` and `make logs` with JSON output, so that I can check health
+          and query logs of any environment with one command.
+        acceptance_criteria:
+          - "`make env-status ENV=<env>` reads the manifest and prints JSON health for each endpoint and service."
+          - "`make logs ENV=<env> SERVICE=<svc> SINCE=1h` runs a Logs Insights query and prints JSON lines."
+          - Both use the manifest's agent_profile and refuse environments whose status is not active.
+        docs: [docs/06-environments/ai-environment-access.md, ops/README.md]
+        depends_on: [ST-03.5.2]
+      - id: ST-03.5.5
+        title: Activate the dev manifest with real values
+        type: chore
+        status: ready
+        priority: P0
+        size: XS
+        story: >
+          As an AI agent, I want ops/environments/dev.yaml to contain real account, endpoints and roles, so that
+          tooling and MCP servers target dev correctly.
+        acceptance_criteria:
+          - All TBD values in dev.yaml are replaced and the status is active.
+          - "`make ops-validate` passes and `make env-status ENV=dev` reports healthy."
+        docs: [ops/environments/dev.yaml]
+        depends_on: [ST-03.3.3, ST-03.5.4]

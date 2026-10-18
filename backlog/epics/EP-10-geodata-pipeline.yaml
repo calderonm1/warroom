@@ -1,0 +1,144 @@
+id: EP-10
+title: Geodata and map content pipeline
+milestone: M1
+priority: P0
+summary: >
+  A reproducible Python pipeline that turns licensed open geodata into provinces, sea zones,
+  adjacency, distances, the province-ID cubemap and map content YAML for each map size.
+outcome: >
+  `make geodata-build MAP=<id>` deterministically produces the baked map and validated content for the
+  first 16-player map from pinned sources.
+docs: [docs/03-architecture/geodata-pipeline.md, docs/02-game-design/map-and-territory.md]
+refs: [ADR-0015, GDD-MAP-001, RISK-011]
+labels: [geodata, content]
+features:
+  - id: FE-10.1
+    title: Pipeline foundation and sources
+    summary: Tooling project, pinned sources and licence register.
+    stories:
+      - id: ST-10.1.1
+        title: Geodata tool project
+        type: chore
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a content developer, I want a uv-managed geodata package with pinned dependencies, so that map builds
+          are reproducible on any machine and in CI.
+        acceptance_criteria:
+          - tools/geodata is a uv project with its own lockfile, ruff and pytest configured.
+          - Downloads are cached and verified by SHA-256 against a sources manifest.
+        docs: [docs/03-architecture/geodata-pipeline.md, docs/adr/0015-repo-tooling-python-uv.md]
+        depends_on: [ST-02.1.1]
+      - id: ST-10.1.2
+        title: Select data sources and licence register
+        type: spike
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As the project owner, I want every geodata source chosen with a commercial-use licence recorded, so that
+          the shipped map is legally safe.
+        acceptance_criteria:
+          - Sources for boundaries, coastlines, land cover, elevation, cities and roads are chosen; the land cover choice (ESA WorldCover or MODIS) is recorded.
+          - A licence register lists source, version, licence and attribution text; attribution appears in the app credits.
+        docs: [docs/03-architecture/geodata-pipeline.md]
+        refs: [RISK-011, GDD-CONT-012]
+        depends_on: [ST-10.1.1]
+  - id: FE-10.2
+    title: Provinces and graph
+    summary: Province generation, sea zones, adjacency and distances.
+    stories:
+      - id: ST-10.2.1
+        title: Province generation
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a designer, I want provinces generated from administrative boundaries with target counts per map size,
+          so that maps have balanced granularity.
+        acceptance_criteria:
+          - Provinces derive from admin-1 or admin-2 boundaries, merged or split to hit the province count target per map.
+          - Each province gets a type (rural or urban), terrain class and centroid.
+          - Manual overrides live in a YAML file applied after generation.
+        docs: [docs/03-architecture/geodata-pipeline.md, docs/02-game-design/map-and-territory.md]
+        refs: [GDD-MAP-001, GDD-MAP-002, GDD-MAP-003]
+        depends_on: [ST-10.1.2]
+      - id: ST-10.2.2
+        title: Sea zones and adjacency
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a simulation developer, I want land and sea adjacency including straits and ports, so that movement and
+          naval rules have a correct graph.
+        acceptance_criteria:
+          - Sea zones are generated; adjacency includes land-land, land-sea (ports) and strait crossings from an overrides list.
+          - Graph checks - connected components as expected, no orphan provinces.
+        docs: [docs/03-architecture/geodata-pipeline.md]
+        refs: [GDD-MAP-004, GDD-MIL-003]
+        depends_on: [ST-10.2.1]
+      - id: ST-10.2.3
+        title: Geodesic edge distances
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a simulation developer, I want precomputed geodesic distances on every edge, so that runtime movement
+          needs no floating-point maths.
+        acceptance_criteria:
+          - Distances between centroids along each edge are computed with a geodesic library and stored as integer metres.
+        docs: [docs/03-architecture/geodata-pipeline.md]
+        refs: [GDD-MAP-008, SIM-024]
+        depends_on: [ST-10.2.2]
+  - id: FE-10.3
+    title: Bake and content output
+    summary: Cubemap ID textures, the .wrmap bundle and content YAML.
+    stories:
+      - id: ST-10.3.1
+        title: Bake province-ID cubemap and .wrmap
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a client developer, I want a baked cubemap of province IDs and a compact map bundle, so that the globe
+          renderer and picking use the same data.
+        acceptance_criteria:
+          - Cubemap faces encode province IDs at the resolution per quality tier; a CPU-side copy is exported for picking.
+          - The .wrmap bundle (stored in LFS) contains the textures plus a header with map ID, version and content hash.
+          - Builds are byte-for-byte reproducible from the same inputs.
+        docs: [docs/03-architecture/geodata-pipeline.md, docs/03-architecture/globe-rendering.md]
+        depends_on: [ST-10.2.1]
+      - id: ST-10.3.2
+        title: Map content YAML and validation
+        type: feature
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a content developer, I want the pipeline to emit map content as schema-valid YAML, so that the
+          simulation loads maps like any other content.
+        acceptance_criteria:
+          - Provinces, sea zones, adjacency, starting owners and VP are written under content/packs/modern/maps/<map-id>/.
+          - Output validates against shared/content-schema and the content CI check.
+        docs: [docs/02-game-design/content-model.md, docs/03-architecture/geodata-pipeline.md]
+        refs: [GDD-CONT-001, GDD-CONT-004, GDD-CONT-005]
+        depends_on: [ST-10.2.3]
+      - id: ST-10.3.3
+        title: First 16-player map
+        type: feature
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a player, I want a first world map for 16 players, so that the vertical slice has a real map to play on.
+        acceptance_criteria:
+          - A world map with 16 playable nations, provinces, VP and strategic sites per map-and-territory.md is built and committed.
+          - Disputed areas follow GDD-CONT-012 labelling.
+        docs: [docs/02-game-design/map-and-territory.md, docs/02-game-design/content-model.md]
+        refs: [GDD-MAP-005, GDD-CONT-010, GDD-CONT-012]
+        depends_on: [ST-10.3.1, ST-10.3.2]

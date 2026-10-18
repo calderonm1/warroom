@@ -1,0 +1,212 @@
+id: EP-04
+title: CI/CD pipelines
+milestone: M1
+priority: P0
+summary: >
+  GitHub Actions pipelines for shared code, server, contracts, client builds (Android on Linux, iOS on
+  macOS runners), infrastructure, deployment and nightly verification.
+outcome: >
+  Every merge to main is tested and deployed to dev; tags promote to staging; mobile builds reach
+  TestFlight and Play internal testing without a local Mac.
+docs: [docs/06-environments/ci-cd.md, docs/adr/0017-ci-cd-github-actions.md]
+refs: [ADR-0017]
+labels: [ci]
+features:
+  - id: FE-04.1
+    title: Code pipelines
+    summary: Shared simulation, server and contract pipelines plus supply-chain checks.
+    stories:
+      - id: ST-04.1.1
+        title: Workflow conventions, caching and concurrency
+        type: infra
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As a developer, I want consistent workflow structure with path filters, caching and cancellation of
+          superseded runs, so that CI is fast and cheap.
+        acceptance_criteria:
+          - Reusable workflow or composite actions for setup (dotnet, uv, buf) exist.
+          - Each workflow uses path filters, concurrency groups and pinned action SHAs.
+          - ci-cd.md documents the conventions.
+        docs: [docs/06-environments/ci-cd.md]
+        depends_on: [ST-01.3.2]
+      - id: ST-04.1.2
+        title: Shared simulation pipeline
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a simulation developer, I want the shared assembly built and tested on x64 and arm64 with a
+          coverage gate, so that determinism regressions are caught on both architectures.
+        acceptance_criteria:
+          - Builds netstandard2.1 and runs unit, property and golden replay tests on ubuntu x64 and arm64 runners.
+          - Golden state hashes must match across both architectures.
+          - Coverage below the threshold in testing.md fails the job.
+        docs: [docs/06-environments/ci-cd.md, docs/05-conventions/testing.md]
+        refs: [SIM-002, RISK-002]
+        depends_on: [ST-05.1.1, ST-04.1.1]
+      - id: ST-04.1.3
+        title: Server pipeline
+        type: infra
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a server developer, I want unit, integration and contract tests plus container builds on every PR,
+          so that only deployable images reach ECR.
+        acceptance_criteria:
+          - Runs unit tests, Testcontainers integration tests (Postgres, Valkey) and contract tests.
+          - Builds ARM64 images tagged with the git SHA; pushes to ECR only on main via OIDC.
+          - Image is scanned and an SBOM is attached.
+        docs: [docs/06-environments/ci-cd.md, docs/05-conventions/testing.md]
+        depends_on: [ST-02.2.2, ST-03.5.1, ST-04.1.1]
+      - id: ST-04.1.4
+        title: Contracts pipeline
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As a developer, I want protocol and API changes linted and checked for breaking changes, so that clients
+          in the field never break unexpectedly.
+        acceptance_criteria:
+          - buf lint and buf breaking against main run for shared/contracts.
+          - Spectral lints the OpenAPI spec.
+          - Generated code drift fails the job (regenerate and diff).
+        docs: [docs/05-conventions/api-and-contracts.md, docs/06-environments/ci-cd.md]
+        refs: [ADR-0006]
+        depends_on: [ST-07.1.1, ST-04.1.1]
+      - id: ST-04.1.5
+        title: Licence and secret scanning
+        type: infra
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want dependency licences and leaked secrets checked automatically, so that
+          GPL code or credentials never ship.
+        acceptance_criteria:
+          - A licence check fails on GPL or AGPL dependencies in shipped code (NuGet, Unity packages, Python runtime deps).
+          - gitleaks runs on every PR and on main.
+          - Dependabot or Renovate is configured for all ecosystems.
+        docs: [docs/05-conventions/security-and-privacy.md]
+        depends_on: [ST-04.1.1]
+  - id: FE-04.2
+    title: Client pipelines
+    summary: Unity tests and builds for Android and iOS and the release lanes.
+    docs: [docs/06-environments/ci-cd.md, docs/06-environments/device-testing.md]
+    stories:
+      - id: ST-04.2.1
+        title: Unity tests and Android build
+        type: infra
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a client developer, I want EditMode tests and an Android build on every client PR, so that broken
+          builds are caught before merge.
+        acceptance_criteria:
+          - GameCI runs EditMode tests and builds an Android AAB and a development APK on Linux.
+          - The Unity licence is activated from secrets and returned after the job.
+          - A build size report is posted as a job summary and fails above the NFR-PERF-001g budget.
+        docs: [docs/06-environments/ci-cd.md]
+        refs: [NFR-PERF-001g]
+        depends_on: [ST-02.3.1, ST-04.1.1]
+      - id: ST-04.2.2
+        title: iOS build on macOS runners
+        type: infra
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As a developer without a Mac, I want CI to produce signed iOS builds, so that I can test on my iPhone
+          and ship to TestFlight.
+        acceptance_criteria:
+          - Unity exports the Xcode project; a macOS runner builds and signs it with fastlane match (certificates in an encrypted repo or S3).
+          - The IPA is uploaded as an artifact; the job documents runner cost per build.
+        docs: [docs/06-environments/ci-cd.md, docs/06-environments/device-testing.md]
+        refs: [OQ-001, RISK-007]
+        depends_on: [ST-04.2.1, ST-01.4.2]
+      - id: ST-04.2.3
+        title: Mobile release lanes
+        type: infra
+        status: ready
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want tags to ship builds to TestFlight and Play internal testing, so that
+          testers get builds without manual uploads.
+        acceptance_criteria:
+          - On v* tags, fastlane uploads to TestFlight and the Play internal track with release notes from the changelog.
+          - Promotion to wider tracks requires a manual approval environment.
+        docs: [docs/06-environments/ci-cd.md, docs/05-conventions/git-and-review.md]
+        depends_on: [ST-04.2.2]
+  - id: FE-04.3
+    title: Infrastructure and deployment
+    summary: Terraform plan and apply, service deployment, smoke tests and rollback.
+    stories:
+      - id: ST-04.3.1
+        title: Infrastructure workflow
+        type: infra
+        status: ready
+        priority: P0
+        size: S
+        story: >
+          As an infrastructure developer, I want plans on PRs and applies to dev on merge, so that infra changes
+          are reviewed with their real effect.
+        acceptance_criteria:
+          - fmt, tflint and checkov (high severity fails) run on infra changes.
+          - Plans per env are posted as PR comments; dev applies automatically on merge; staging and prod need approval.
+        docs: [docs/06-environments/ci-cd.md, docs/adr/0008-iac-terraform.md]
+        depends_on: [ST-03.5.1]
+      - id: ST-04.3.2
+        title: Deploy workflow with migrations and smoke tests
+        type: infra
+        status: ready
+        priority: P0
+        size: M
+        story: >
+          As the project owner, I want main deployed to dev and tags to staging automatically, with prod promoted
+          manually, so that environments always run known builds.
+        acceptance_criteria:
+          - Deploy runs the Migrator task, updates ECS services with the SHA-tagged image and waits for stability.
+          - Smoke tests (health, guest login, create and join a dev match) run after deploy; failure triggers rollback.
+          - The deployed version is recorded and visible to agents via env-status.
+        docs: [docs/06-environments/ci-cd.md]
+        depends_on: [ST-04.1.3, ST-03.3.3, ST-06.4.1]
+      - id: ST-04.3.3
+        title: Rollback runbook and command
+        type: infra
+        status: draft
+        priority: P1
+        size: S
+        story: >
+          As an operator, I want one command to roll a service back to the previous version, so that a bad deploy
+          is reverted quickly.
+        acceptance_criteria:
+          - "`make rollback ENV=<env> SERVICE=<svc>` redeploys the previous task definition."
+          - A runbook in ops/ describes when to roll back versus forward-fix, including database migration constraints.
+        docs: [docs/06-environments/ci-cd.md, ops/README.md]
+        depends_on: [ST-04.3.2]
+  - id: FE-04.4
+    title: Nightly verification
+    summary: Soak, performance and end-to-end runs on a schedule.
+    stories:
+      - id: ST-04.4.1
+        title: Nightly workflow
+        type: infra
+        status: draft
+        priority: P1
+        size: M
+        milestone: M2
+        story: >
+          As the project owner, I want nightly soak, performance and bot end-to-end runs, so that slow regressions
+          surface before players see them.
+        acceptance_criteria:
+          - Runs an AI-only match soak with determinism hash checks, PlayMode performance tests and E2E bots against dev.
+          - Results are summarized in an issue labelled nightly with links to artifacts.
+        docs: [docs/06-environments/ci-cd.md, docs/05-conventions/testing.md]
+        refs: [GDD-AI-007]
+        depends_on: [ST-04.3.2, ST-05.6.1]
