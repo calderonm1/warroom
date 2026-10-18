@@ -1,0 +1,42 @@
+# War Room environment manifest. Schema: ops/environments/schema.json
+name: dev
+purpose: Shared cloud integration environment. Auto-deployed from main. Device dev builds point here.
+status: planned
+created_by_story: EP-03
+aws:
+  account_alias: warroom-dev
+  account_id: TBD
+  region: us-east-1
+  agent_profile: wr-dev-agent
+  agent_role_arn: null
+endpoints:
+  gateway_ws: wss://api.dev.TBD-domain/v1/ws
+  meta_api: https://api.dev.TBD-domain/v1/
+  admin_api: internal ALB (via SSM port forwarding), TBD
+  cdn: https://cdn.dev.TBD-domain/
+observability:
+  log_groups: [/wr/dev/gateway, /wr/dev/silo, /wr/dev/workers, /wr/dev/admin]
+  dashboards: [wr-dev-overview]
+  alarms_prefix: wr-dev-
+  metrics_namespace: WarRoom/dev
+  sentry_projects: [warroom-client, warroom-server]
+  athena_database: wr_dev_analytics
+data:
+  classes_present: [C3]
+  agent_views: []
+  notes: Synthetic data only. May be wiped at any time.
+agent_policy:
+  can_read: true
+  can_deploy: true
+  can_apply_infra: true
+  can_run_admin_writes: true
+  notes: Agents may deploy and apply Terraform in dev using wr-dev-agent (wr-agent-deployer role). Announce destructive actions in the PR.
+services:
+  - { name: gateway, kind: ecs-fargate, resource: wr-dev-gateway }
+  - { name: silo, kind: ecs-fargate, resource: wr-dev-silo }
+  - { name: workers, kind: ecs-fargate, resource: wr-dev-workers }
+  - { name: admin, kind: ecs-fargate, resource: wr-dev-admin }
+  - { name: aurora, kind: aurora-postgresql-serverless-v2, resource: wr-dev-aurora }
+  - { name: valkey, kind: elasticache-serverless, resource: wr-dev-valkey }
+runbooks:
+  - docs/06-environments/ai-environment-access.md

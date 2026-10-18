@@ -1,0 +1,42 @@
+# War Room environment manifest. Schema: ops/environments/schema.json
+name: prod
+purpose: Live production environment serving real players.
+status: planned
+created_by_story: EP-03
+aws:
+  account_alias: warroom-prod
+  account_id: TBD
+  region: us-east-1
+  agent_profile: wr-prod-agent
+  agent_role_arn: null
+endpoints:
+  gateway_ws: wss://api.TBD-domain/v1/ws
+  meta_api: https://api.TBD-domain/v1/
+  admin_api: internal ALB (via SSM port forwarding), TBD
+  cdn: https://cdn.TBD-domain/
+observability:
+  log_groups: [/wr/prod/gateway-redacted, /wr/prod/silo-redacted, /wr/prod/workers-redacted]
+  dashboards: [wr-prod-overview, wr-prod-matches, wr-prod-economy]
+  alarms_prefix: wr-prod-
+  metrics_namespace: WarRoom/prod
+  sentry_projects: [warroom-client, warroom-server]
+  athena_database: wr_prod_analytics
+data:
+  classes_present: [C1, C2, C3, C4]
+  agent_views: [analytics.v_events_pseudonymous, admin.v_matches_redacted]
+  notes: Contains personal data. Agents use only redacted log groups and views. Never copy raw player data into prompts or PRs.
+agent_policy:
+  can_read: true
+  can_deploy: false
+  can_apply_infra: false
+  can_run_admin_writes: false
+  notes: Read-only and audited. SCPs deny writes for agent roles. Incidents are handled by the owner; agents investigate and propose.
+services:
+  - { name: gateway, kind: ecs-fargate, resource: wr-prod-gateway }
+  - { name: silo, kind: ecs-fargate, resource: wr-prod-silo }
+  - { name: workers, kind: ecs-fargate, resource: wr-prod-workers }
+  - { name: admin, kind: ecs-fargate, resource: wr-prod-admin }
+  - { name: aurora, kind: aurora-postgresql-serverless-v2, resource: wr-prod-aurora }
+  - { name: valkey, kind: elasticache-serverless, resource: wr-prod-valkey }
+runbooks:
+  - docs/06-environments/ai-environment-access.md

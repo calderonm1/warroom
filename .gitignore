@@ -17,6 +17,9 @@ Thumbs.db
 *.keystore
 !debug.keystore
 
+# Local agent config (may contain tokens); template lives in ops/mcp/
+.cursor/mcp.json
+
 # Python tooling
 .venv/
 __pycache__/

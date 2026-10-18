@@ -1,0 +1,36 @@
+# War Room environment manifest. Schema: ops/environments/schema.json
+# Read this before interacting with the environment (AGENTS.md §8).
+name: local
+purpose: Developer machine or cloud agent VM running the DevHost, Docker dependencies and the Unity Editor.
+status: planned
+created_by_story: EP-02
+aws:
+  account_alias: null
+  account_id: null
+  region: null
+  agent_profile: null
+endpoints:
+  gateway_ws: ws://localhost:47100/v1/ws
+  meta_api: http://localhost:47100/v1/
+  admin_api: http://localhost:47101/admin/v1/
+  openapi_ui: http://localhost:47100/docs
+  postgres: postgresql://warroom@localhost:47432/warroom
+  valkey: redis://localhost:47379
+observability:
+  log_groups: []
+  notes: DevHost writes JSON logs to stdout and artifacts/logs/devhost.jsonl. Traces go to a local OTLP endpoint if one is running (optional Aspire dashboard).
+data:
+  classes_present: [C3]
+  notes: Synthetic data only. Safe to wipe with `make dev-reset`.
+agent_policy:
+  can_read: true
+  can_deploy: true
+  can_apply_infra: false
+  can_run_admin_writes: true
+  notes: Full control locally. No cloud resources involved.
+services:
+  - { name: devhost, kind: dotnet-process, notes: gateway + silo + workers + admin in one process }
+  - { name: postgres, kind: docker, resource: "postgres:17" }
+  - { name: valkey, kind: docker, resource: "valkey/valkey:8" }
+runbooks:
+  - docs/06-environments/local-development.md

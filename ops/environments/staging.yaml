@@ -1,0 +1,42 @@
+# War Room environment manifest. Schema: ops/environments/schema.json
+name: staging
+purpose: Production-like environment for release candidates, load tests and closed playtests.
+status: planned
+created_by_story: EP-03
+aws:
+  account_alias: warroom-staging
+  account_id: TBD
+  region: us-east-1
+  agent_profile: wr-staging-agent
+  agent_role_arn: null
+endpoints:
+  gateway_ws: wss://api.staging.TBD-domain/v1/ws
+  meta_api: https://api.staging.TBD-domain/v1/
+  admin_api: internal ALB (via SSM port forwarding), TBD
+  cdn: https://cdn.staging.TBD-domain/
+observability:
+  log_groups: [/wr/staging/gateway, /wr/staging/silo, /wr/staging/workers, /wr/staging/admin]
+  dashboards: [wr-staging-overview]
+  alarms_prefix: wr-staging-
+  metrics_namespace: WarRoom/staging
+  sentry_projects: [warroom-client, warroom-server]
+  athena_database: wr_staging_analytics
+data:
+  classes_present: [C2, C3]
+  agent_views: [analytics.v_events_pseudonymous]
+  notes: Playtest accounts contain limited personal data (C2). Use redacted views.
+agent_policy:
+  can_read: true
+  can_deploy: false
+  can_apply_infra: false
+  can_run_admin_writes: false
+  notes: Read-only. Changes go through CI on release tags with human approval.
+services:
+  - { name: gateway, kind: ecs-fargate, resource: wr-staging-gateway }
+  - { name: silo, kind: ecs-fargate, resource: wr-staging-silo }
+  - { name: workers, kind: ecs-fargate, resource: wr-staging-workers }
+  - { name: admin, kind: ecs-fargate, resource: wr-staging-admin }
+  - { name: aurora, kind: aurora-postgresql-serverless-v2, resource: wr-staging-aurora }
+  - { name: valkey, kind: elasticache-serverless, resource: wr-staging-valkey }
+runbooks:
+  - docs/06-environments/ai-environment-access.md

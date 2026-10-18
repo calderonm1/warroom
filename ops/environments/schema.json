@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://warroom/ops/environments/schema.json",
+  "title": "War Room environment manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "purpose", "status", "aws", "endpoints", "observability", "data", "agent_policy"],
+  "properties": {
+    "name": { "enum": ["local", "dev", "staging", "prod"] },
+    "purpose": { "type": "string", "minLength": 10 },
+    "status": { "enum": ["planned", "provisioning", "active", "decommissioned"] },
+    "created_by_story": { "type": "string", "pattern": "^(ST-\\d{2}\\.\\d+\\.\\d+|EP-\\d{2})$" },
+    "aws": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["account_alias", "account_id", "region", "agent_profile"],
+      "properties": {
+        "account_alias": { "type": ["string", "null"] },
+        "account_id": { "type": ["string", "null"], "pattern": "^(\\d{12}|TBD)$" },
+        "region": { "type": ["string", "null"] },
+        "agent_profile": { "type": ["string", "null"] },
+        "agent_role_arn": { "type": ["string", "null"] }
+      }
+    },
+    "endpoints": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "log_groups": { "type": "array", "items": { "type": "string" } },
+        "dashboards": { "type": "array", "items": { "type": "string" } },
+        "alarms_prefix": { "type": "string" },
+        "metrics_namespace": { "type": "string" },
+        "sentry_projects": { "type": "array", "items": { "type": "string" } },
+        "athena_database": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classes_present"],
+      "properties": {
+        "classes_present": { "type": "array", "items": { "enum": ["C1", "C2", "C3", "C4"] } },
+        "agent_views": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" }
+      }
+    },
+    "agent_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["can_read", "can_deploy", "can_apply_infra", "can_run_admin_writes"],
+      "properties": {
+        "can_read": { "type": "boolean" },
+        "can_deploy": { "type": "boolean" },
+        "can_apply_infra": { "type": "boolean" },
+        "can_run_admin_writes": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "kind"],
+        "properties": {
+          "name": { "type": "string" },
+          "kind": { "type": "string" },
+          "resource": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "runbooks": { "type": "array", "items": { "type": "string" } }
+  }
+}

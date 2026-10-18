@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "aws": {
+      "command": "uvx",
+      "args": ["awslabs.aws-api-mcp-server@latest"],
+      "env": {
+        "AWS_PROFILE": "wr-dev-agent",
+        "AWS_REGION": "us-east-1",
+        "READ_OPERATIONS_ONLY": "true"
+      }
+    },
+    "cloudwatch": {
+      "command": "uvx",
+      "args": ["awslabs.cloudwatch-mcp-server@latest"],
+      "env": {
+        "AWS_PROFILE": "wr-dev-agent",
+        "AWS_REGION": "us-east-1"
+      }
+    },
+    "sentry": {
+      "url": "https://mcp.sentry.dev/mcp"
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${env:WR_GITHUB_MCP_TOKEN}"
+      }
+    },
+    "unity": {
+      "command": "unity",
+      "args": ["mcp"]
+    }
+  }
+}
