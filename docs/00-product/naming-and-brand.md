@@ -1,6 +1,6 @@
 ---
 title: Naming, brand and identifiers
-status: review
+status: accepted
 owner: product
 last_reviewed: 2026-10-18
 related: [BR-001, ST-01.4.1, ST-01.4.2]
@@ -11,9 +11,11 @@ related: [BR-001, ST-01.4.1, ST-01.4.2]
 ## Decision
 
 - **Product name:** War Room
-- **Proposed store title:** **War Room: Global Theater** (24 characters, within the 30-character limits of both the App Store name and the Google Play title)
-- **Proposed App Store subtitle / Play short description lead:** "Real-Time Global Strategy"
+- **Store title (confirmed by the project owner):** **War Room: Global Theater** (24 characters, within the 30-character limits of both the App Store name and the Google Play title)
+- **App Store subtitle / Play short description lead (confirmed):** "Real-Time Global Strategy"
 - **Internal names:** `War Room` (prose), `warroom` (identifiers, packages, domains), `wr` (short prefix for cloud resources), `WarRoom` (C# root namespace)
+
+The store title and subtitle are decided. What remains open is clearance, not naming: the trademark search, store name reservation and fallback subtitles below are a safety net in case clearance surfaces a conflict (tracked in `ST-01.4.1`).
 
 ## Why a subtitle is needed
 

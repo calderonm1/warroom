@@ -2,7 +2,7 @@
 
 **War Room** is a real-time grand strategy game for iOS and Android, with a planned web client. Matches are played on a fully 3D globe. Players lead modern nations through economy, research, diplomacy and military campaigns in persistent matches that last days to weeks.
 
-> Working store name: **War Room: Global Theater** (see [naming and brand](docs/00-product/naming-and-brand.md)).
+> Store name: **War Room: Global Theater**, subtitle **"Real-Time Global Strategy"** (see [naming and brand](docs/00-product/naming-and-brand.md)).
 > Everywhere else (repos, cloud resources, code, docs) the product is simply **War Room**, with the short code `wr` and the identifier `warroom`.
 
 This repository is the single source of truth for the game. It holds the design documents, the architecture decision records, the development conventions, the machine-readable backlog, the environment manifests, and (as the backlog is delivered) the client, server and infrastructure code.
