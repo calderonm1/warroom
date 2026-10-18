@@ -1,0 +1,49 @@
+name: repo-checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: repo-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install tooling
+        run: make setup
+      - name: Lint tooling
+        run: make lint
+      - name: Test tooling
+        run: make test-tools
+      - name: Docs check
+        run: make docs-check
+      - name: Backlog validate
+        run: make backlog-validate
+      - name: Backlog index is fresh
+        run: make backlog-index-check
+      - name: Environment manifests
+        run: make ops-validate
+      - name: Ready stories (summary)
+        if: always()
+        run: |
+          {
+            echo "## Ready stories"
+            echo '```'
+            uv run --frozen wr backlog next --limit 15
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

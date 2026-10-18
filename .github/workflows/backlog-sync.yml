@@ -1,0 +1,46 @@
+name: backlog-sync
+
+on:
+  push:
+    branches: [main]
+    paths: ["backlog/**"]
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Apply changes (otherwise dry run)
+        type: boolean
+        default: true
+
+concurrency:
+  group: backlog-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ vars.WR_PROJECT_OWNER != '' && vars.WR_PROJECT_NUMBER != '' }}
+    env:
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      WR_PROJECTS_TOKEN: ${{ secrets.WR_PROJECTS_TOKEN }}
+      WR_PROJECT_OWNER: ${{ vars.WR_PROJECT_OWNER }}
+      WR_PROJECT_NUMBER: ${{ vars.WR_PROJECT_NUMBER }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: make setup
+      - name: Validate backlog
+        run: make backlog-validate
+      - name: Sync (apply)
+        if: ${{ github.event_name == 'push' || inputs.apply }}
+        run: make backlog-sync
+      - name: Sync (dry run)
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.apply }}
+        run: make backlog-sync-plan

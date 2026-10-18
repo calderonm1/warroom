@@ -19,6 +19,9 @@ The project is **AI-first**: every document, backlog item and environment is str
 | [`backlog/`](backlog/README.md) | Epics, features and stories as validated YAML. The source of truth for work. |
 | [`ops/`](ops/README.md) | Machine-readable environment manifests (local, dev, staging, prod) and MCP configuration for agents |
 | [`tools/`](tools/README.md) | Repo tooling: backlog validator, index generator, GitHub Projects sync, docs checker |
+| [`design/`](design/tokens.json) | Design tokens (colours, type, spacing, motion) generated into Unity USS; see the [design system](docs/04-ux/design-system.md) |
+| [`.github/`](.github/workflows/repo-checks.yml) | CI workflows (repo checks, backlog sync) and the PR template |
+| [`.cursor/rules/`](.cursor/rules/00-project-core.mdc) | Always-on and scoped rules for AI agents in Cursor |
 | [`client/`](client/README.md) | Unity 6 mobile client (scaffolded by backlog story `ST-02.3.1`) |
 | [`server/`](server/README.md) | .NET 10 backend: gateway, match runtime (Orleans), meta APIs |
 | [`shared/`](shared/README.md) | Code shared by client and server: deterministic simulation (`netstandard2.1`, C# 9) and protocol contracts |
