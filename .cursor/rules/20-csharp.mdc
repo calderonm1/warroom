@@ -1,0 +1,15 @@
+---
+description: C# rules for shared simulation, server and Unity client code
+globs: **/*.cs,**/*.csproj,**/*.asmdef
+alwaysApply: false
+---
+
+# C# conventions (summary of docs/05-conventions/csharp-style.md)
+
+- Namespaces mirror folders and start with `WarRoom.` (for example `WarRoom.Simulation.Combat`).
+- Nullable reference types enabled; warnings are errors; analyzers on.
+- `shared/**`: `netstandard2.1`, `LangVersion 9`. No file-scoped namespaces, global usings, `record struct`, or other C# 10+ features. Deterministic only: use `Fixed64` and the injected `IDeterministicRandom`, never `float`/`double` in state, never `DateTime.Now`, never iterate `Dictionary`/`HashSet` where order affects state.
+- `server/**`: .NET 10, C# 14 allowed. Async all the way; pass `CancellationToken`. No blocking calls in Orleans grains.
+- `client/**`: Unity 6.3 LTS. MonoBehaviours are thin adapters. Logic lives in plain C# classes in assemblies with `.asmdef` boundaries. No `FindObjectOfType` or `GameObject.Find` in runtime code.
+- Public APIs get XML doc comments. Comments explain *why*, never *what*.
+- Tests: xUnit (shared/server), Unity Test Framework (client). Name tests `Method_Scenario_ExpectedResult`.

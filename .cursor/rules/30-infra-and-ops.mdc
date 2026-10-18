@@ -1,0 +1,14 @@
+---
+description: Rules for Terraform, CI workflows and environment manifests
+globs: infra/**,ops/**,.github/workflows/**
+alwaysApply: false
+---
+
+# Infra and ops
+
+- Read the target environment manifest in `ops/environments/<env>.yaml` before any change. Respect its `agent_policy`.
+- Terraform: modules in `infra/modules/<name>`, root stacks in `infra/envs/<env>/<stack>`. Resource names use `wr-<env>-<component>[-<qualifier>]`. Tag every resource: `project=warroom`, `env`, `component`, `managed_by=terraform`, `story`.
+- Never apply Terraform to staging or prod from an agent session. Produce `terraform plan` output for human review.
+- CI uses GitHub OIDC to assume per-environment roles. No long-lived AWS keys anywhere.
+- Secrets live in AWS Secrets Manager / SSM Parameter Store or GitHub Actions secrets. Never in code, manifests, or logs.
+- When you add or change an endpoint, log group, dashboard or role, update the environment manifest in the same change.

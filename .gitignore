@@ -1,0 +1,62 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.p8
+*.mobileprovision
+*.keystore
+!debug.keystore
+
+# Python tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+coverage/
+
+# Unity (client/)
+client/[Ll]ibrary/
+client/[Tt]emp/
+client/[Oo]bj/
+client/[Bb]uild/
+client/[Bb]uilds/
+client/[Ll]ogs/
+client/[Uu]ser[Ss]ettings/
+client/[Mm]emoryCaptures/
+client/*.csproj
+client/*.sln
+client/.vsconfig
+client/*.apk
+client/*.aab
+client/*.ipa
+client/crashlytics-build.properties
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+
+# Generated artifacts
+artifacts/
+replays/*.local.*

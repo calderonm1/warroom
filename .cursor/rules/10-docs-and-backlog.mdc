@@ -1,0 +1,15 @@
+---
+description: Rules for editing design docs, ADRs and backlog YAML
+globs: docs/**/*.md,backlog/**/*.yaml,backlog/**/*.json
+alwaysApply: false
+---
+
+# Docs and backlog
+
+- Every `docs/**/*.md` file needs front matter: `title`, `status` (draft|review|accepted|superseded|deprecated), `owner`, `last_reviewed` (YYYY-MM-DD), `related` (list of IDs or paths).
+- Link every new doc from `docs/README.md`. `make docs-check` fails otherwise.
+- ADRs: copy `docs/adr/0000-template.md` and use the next free number. Never edit an accepted ADR's decision; supersede it with a new ADR and set the old one to `superseded`.
+- Requirement IDs (`GDD-<AREA>-NNN`, `NFR-<AREA>-NNN`, `CONV-<AREA>-NNN`) are permanent. Do not renumber them; mark them deprecated instead.
+- Backlog items follow `backlog/schema/backlog.schema.json`. IDs: `EP-NN`, `FE-NN.N`, `ST-NN.N.N`. Never renumber or reuse IDs.
+- Acceptance criteria must be objectively testable. Prefer Given/When/Then.
+- After editing backlog YAML run `make backlog-validate backlog-index`.

@@ -1,0 +1,16 @@
+---
+description: Core War Room rules that apply to every task
+alwaysApply: true
+---
+
+# War Room core rules
+
+- Read `AGENTS.md` before starting. It is the binding operating manual.
+- Work maps to a backlog story in `backlog/epics/*.yaml`. Reference the story ID (`ST-xx.y.z`) in branch names, commits and PRs.
+- Source-of-truth order: accepted ADRs, then conventions, then architecture/GDD, then backlog, then code.
+- The server is authoritative. Never trust the client and never leak hidden state (fog of war) to clients.
+- `shared/` targets netstandard2.1 and C# 9. It must be deterministic: no wall-clock time, no System.Random, no floats in state transitions.
+- Game content and balance numbers live in `content/` (YAML), never hard-coded.
+- Never commit secrets. Never mutate staging/prod directly. Agents may deploy to dev only.
+- Update docs, story status and `backlog/INDEX.md` (`make backlog-index`) in the same change as the code.
+- Run `make check` before committing.
