@@ -126,7 +126,7 @@ features:
         acceptance_criteria:
           - Given no token, when `make backlog-sync-plan` runs, then it prints planned creates and updates without network writes.
           - "Each epic and story maps to one issue carrying the hidden marker `<!-- warroom-backlog-id: ID -->`; reruns update rather than duplicate."
-          - Project fields Status, Priority, Size, Milestone, Epic and Type are set from YAML.
+          - Project fields Status, Priority, Size, Roadmap, Epic and Kind are set from YAML.
           - The backlog-sync workflow runs on pushes to main that touch backlog/.
         docs: [docs/adr/0014-backlog-as-code-github-projects.md, docs/06-environments/ci-cd.md]
         depends_on: [ST-01.2.2]
@@ -142,8 +142,8 @@ features:
           sync run populates a usable board.
         acceptance_criteria:
           - A user- or org-level project named "War Room" exists.
-          - Single-select fields exist with the options in tools/README.md (Status, Priority, Size, Milestone, Type) plus a text field Epic.
-          - Views exist for "Board by Status", "Roadmap by Milestone" and "Current milestone".
+          - Single-select fields exist with the options in tools/README.md (Status, Priority, Size, Roadmap, Kind) plus a text field Epic. Do not create custom fields named Type or Milestone (GitHub system fields).
+          - Views exist for "Board by Status", "Board by Roadmap" and "Current milestone".
           - "`make backlog-sync` completes against the board and the run is linked in ST-01.2.3 agent_notes."
         docs: [tools/README.md]
         depends_on: [ST-01.1.4]

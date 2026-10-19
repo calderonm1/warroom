@@ -42,8 +42,8 @@ def test_build_desired_shapes_items(repo):
         "Status": "Ready",
         "Priority": "P1",
         "Size": "S",
-        "Milestone": "M0",
-        "Type": "Feature",
+        "Roadmap": "M0",
+        "Kind": "Feature",
         "Epic": "EP-01",
     }
     assert desired["ST-01.1.1"].closed is True
@@ -79,7 +79,7 @@ def test_plan_detects_drift(repo):
     assert ("update_issue", "ST-01.1.1", "state->closed") in actions
     assert ("set_field", "ST-01.1.2", "Priority=P1") in actions
     assert ("add_to_project", "EP-01", "") in actions
-    assert ("set_field", "EP-01", "Type=Epic") in actions
+    assert ("set_field", "EP-01", "Kind=Epic") in actions
 
 
 def test_project_field_check(repo):
@@ -89,8 +89,8 @@ def test_project_field_check(repo):
         {
             "Status": {"id": "f1", "options": {"Ready": "o1", "Done": "o2"}},
             "Priority": {"id": "f2", "options": {"P0": "o", "P1": "o"}},
-            "Milestone": {"id": "f3", "options": {"M0": "o"}},
-            "Type": {"id": "f4", "options": {"Feature": "o", "Epic": "o"}},
+            "Roadmap": {"id": "f3", "options": {"M0": "o"}},
+            "Kind": {"id": "f4", "options": {"Feature": "o", "Epic": "o"}},
             "Epic": {"id": "f5", "options": {}},
         },
     )

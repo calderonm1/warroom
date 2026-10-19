@@ -39,7 +39,9 @@ TYPE_OPTIONS = {
     "test": "Test",
     "bug": "Bug",
 }
-SINGLE_SELECT_FIELDS = ("Status", "Priority", "Size", "Milestone", "Type")
+# Names avoid GitHub Projects reserved/system fields: built-in "Type" (Issue/PR/Draft)
+# and "Milestone" (GitHub issue milestones).
+SINGLE_SELECT_FIELDS = ("Status", "Priority", "Size", "Roadmap", "Kind")
 TEXT_FIELDS = ("Epic",)
 
 
@@ -162,8 +164,8 @@ def build_desired(backlog: Backlog, repo: str | None = None, branch: str = "main
                 fields=(
                     ("Status", STATUS_OPTIONS[status]),
                     ("Priority", epic["priority"]),
-                    ("Milestone", epic["milestone"]),
-                    ("Type", TYPE_OPTIONS["epic"]),
+                    ("Roadmap", epic["milestone"]),
+                    ("Kind", TYPE_OPTIONS["epic"]),
                     ("Epic", epic["id"]),
                 ),
             )
@@ -182,8 +184,8 @@ def build_desired(backlog: Backlog, repo: str | None = None, branch: str = "main
                     ("Status", STATUS_OPTIONS[story.status]),
                     ("Priority", d["priority"]),
                     ("Size", d["size"]),
-                    ("Milestone", story.milestone),
-                    ("Type", TYPE_OPTIONS[d["type"]]),
+                    ("Roadmap", story.milestone),
+                    ("Kind", TYPE_OPTIONS[d["type"]]),
                     ("Epic", story.epic_id),
                 ),
             )
