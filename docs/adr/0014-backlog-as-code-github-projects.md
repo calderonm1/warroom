@@ -2,7 +2,7 @@
 title: "ADR-0014: Backlog as code (YAML) with one-way sync to GitHub Projects"
 status: accepted
 owner: product
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-19
 related: [BR-009, backlog/README.md, ADR-0015]
 ---
 
