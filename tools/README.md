@@ -40,13 +40,15 @@ The sync is one way: repo to GitHub ([ADR-0014](../docs/adr/0014-backlog-as-code
 
 Create these in the project before the first sync (ST-01.2.4). The sync checks them and lists anything missing.
 
-| Field | Type | Options |
+GitHub Projects already has system fields named **Type** (Issue / Pull request / Draft) and **Milestone** (repo milestones). Do not try to create custom fields with those names. Leave the system fields in place (hide them from views if you want) and create **Kind** and **Roadmap** instead.
+
+| Field | Field type | Options |
 | --- | --- | --- |
-| Status | single select | Draft, Ready, In Progress, Blocked, Done, Cancelled |
+| Status | single select (reuse the built-in field) | Draft, Ready, In Progress, Blocked, Done, Cancelled |
 | Priority | single select | P0, P1, P2, P3 |
 | Size | single select | XS, S, M, L, XL |
-| Milestone | single select | M0, M1, M2, M3, M4, M5, M6, M7 |
-| Type | single select | Epic, Feature, Chore, Spike, Docs, Infra, Test, Bug |
+| Roadmap | single select | M0, M1, M2, M3, M4, M5, M6, M7 |
+| Kind | single select | Epic, Feature, Chore, Spike, Docs, Infra, Test, Bug |
 | Epic | text | (epic ID, for example EP-05) |
 
 The built-in project Status field can be reused by renaming its options to match.
