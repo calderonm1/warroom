@@ -377,6 +377,20 @@ mutation($project: ID!, $content: ID!) {
 }
 """
 
+ISSUE_PROJECT_ITEMS = """
+query($id: ID!) {
+  node(id: $id) {
+    ... on Issue {
+      projectItems(first: 50) {
+        nodes { id project { id } }
+      }
+    }
+  }
+}
+"""
+
+ALREADY_IN_PROJECT = "Content already exists in this project"
+
 SET_SELECT = """
 mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
   updateProjectV2ItemFieldValue(input: {projectId: $project, itemId: $item, fieldId: $field,
@@ -451,6 +465,39 @@ def load_project_items(client: GitHubClient, project: Project) -> dict[str, Proj
         after = items["pageInfo"]["endCursor"]
 
 
+def is_already_in_project(exc: BaseException) -> bool:
+    return ALREADY_IN_PROJECT in str(exc)
+
+
+def find_project_item_id(client: GitHubClient, project_id: str, content_id: str) -> str | None:
+    data = client.graphql(ISSUE_PROJECT_ITEMS, {"id": content_id})
+    nodes = ((data.get("node") or {}).get("projectItems") or {}).get("nodes") or []
+    for node in nodes:
+        if node and (node.get("project") or {}).get("id") == project_id:
+            return node["id"]
+    return None
+
+
+def add_or_find_project_item(client: GitHubClient, project: Project, content_id: str) -> str:
+    """Add content to the project, or return the existing item id if GitHub already has it.
+
+    Project auto-add workflows (and a previous partial sync) can win the race after
+    ``create_issue``. ``addProjectV2ItemById`` then returns UNPROCESSABLE instead of the item.
+    """
+    try:
+        data = client.graphql(ADD_ITEM, {"project": project.id, "content": content_id})
+        return data["addProjectV2ItemById"]["item"]["id"]
+    except GitHubError as exc:
+        if not is_already_in_project(exc):
+            raise
+        item_id = find_project_item_id(client, project.id, content_id)
+        if item_id is None:
+            raise GitHubError(
+                f"content {content_id} is already in project {project.id} but its item id could not be loaded"
+            ) from exc
+        return item_id
+
+
 def apply(
     client: GitHubClient,
     project: Project,
@@ -473,8 +520,8 @@ def apply(
             elif action.op == "update_issue" and issue is not None:
                 client.update_issue(issue.number, item)
             elif action.op == "add_to_project" and issue is not None:
-                data = client.graphql(ADD_ITEM, {"project": project.id, "content": issue.node_id})
-                project_items[issue.node_id] = ProjectItem(data["addProjectV2ItemById"]["item"]["id"])
+                item_id = add_or_find_project_item(client, project, issue.node_id)
+                project_items[issue.node_id] = ProjectItem(item_id)
             elif action.op == "set_field" and issue is not None:
                 name, value = action.detail.split("=", 1)
                 meta = project.fields[name]

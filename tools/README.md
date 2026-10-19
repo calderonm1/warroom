@@ -27,6 +27,8 @@ Output lines start with `ERROR` or `WARN`, followed by the file and the reason. 
 
 The sync is one way: repo to GitHub ([ADR-0014](../docs/adr/0014-backlog-as-code-github-projects.md)). Each epic and story becomes one issue labelled `backlog` with a hidden marker `<!-- warroom-backlog-id: ST-… -->`. Reruns find issues by marker and update them. Done and cancelled stories close their issues.
 
+Adding an issue to the project is idempotent. If a Projects auto-add workflow (or a previous partial run) already placed the issue on the board, `addProjectV2ItemById` returns "Content already exists in this project"; the sync looks up the existing item id and continues setting fields instead of aborting.
+
 ### Configuration
 
 | Name | Kind | Purpose |
