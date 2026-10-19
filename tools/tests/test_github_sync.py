@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+import pytest
 from conftest import epic, story
 
 from warroom_tools import backlog, github_sync
-from warroom_tools.github_sync import ExistingIssue, ProjectItem
+from warroom_tools.github_sync import ExistingIssue, GitHubError, ProjectItem
+
+EXISTING_ERROR = (
+    '[{"type": "UNPROCESSABLE", "path": ["addProjectV2ItemById"], '
+    '"locations": [{"line": 3, "column": 3}], '
+    '"message": "Content already exists in this project"}]'
+)
 
 
 def _desired(repo):
@@ -103,3 +110,77 @@ def test_parse_marker():
     assert github_sync.parse_marker("x\n<!-- warroom-backlog-id: ST-05.1.2 -->\n") == "ST-05.1.2"
     assert github_sync.parse_marker("no marker") is None
     assert github_sync.parse_marker(None) is None
+
+
+class FakeClient:
+    def __init__(self, add_error: str | None = None, items: dict[str, list[tuple[str, str]]] | None = None):
+        self.add_error = add_error
+        self.items = items or {}
+        self.calls: list[tuple[str, dict]] = []
+        self.field_updates: list[dict] = []
+
+    def ensure_labels(self, labels: set[str]) -> None:
+        pass
+
+    def graphql(self, query: str, variables: dict) -> dict:
+        self.calls.append((query, variables))
+        if "addProjectV2ItemById" in query:
+            if self.add_error:
+                raise GitHubError(self.add_error)
+            return {"addProjectV2ItemById": {"item": {"id": "PVTI_new"}}}
+        if "projectItems" in query:
+            nodes = [
+                {"id": item_id, "project": {"id": project_id}}
+                for project_id, item_id in self.items.get(variables["id"], [])
+            ]
+            return {"node": {"projectItems": {"nodes": nodes}}}
+        if "updateProjectV2ItemFieldValue" in query:
+            self.field_updates.append(variables)
+            return {"updateProjectV2ItemFieldValue": {"projectV2Item": {"id": variables["item"]}}}
+        raise AssertionError(f"unexpected query: {query}")
+
+
+def _project() -> github_sync.Project:
+    return github_sync.Project(
+        "P_1",
+        {
+            "Status": {"id": "f1", "options": {"Ready": "o1", "In Progress": "o2", "Done": "o3"}},
+            "Priority": {"id": "f2", "options": {"P0": "p0", "P1": "p1"}},
+            "Size": {"id": "f3", "options": {"S": "s"}},
+            "Roadmap": {"id": "f4", "options": {"M0": "m0"}},
+            "Kind": {"id": "f5", "options": {"Epic": "e", "Feature": "f"}},
+            "Epic": {"id": "f6", "options": {}},
+        },
+    )
+
+
+def test_add_or_find_project_item_returns_new_id():
+    client = FakeClient()
+    assert github_sync.add_or_find_project_item(client, _project(), "I_1") == "PVTI_new"
+
+
+def test_add_or_find_project_item_reuses_existing_on_conflict():
+    client = FakeClient(add_error=EXISTING_ERROR, items={"I_1": [("P_1", "PVTI_existing"), ("P_other", "PVTI_other")]})
+    assert github_sync.add_or_find_project_item(client, _project(), "I_1") == "PVTI_existing"
+
+
+def test_add_or_find_project_item_reraises_other_errors():
+    client = FakeClient(add_error='[{"message": "Resource not accessible by integration"}]')
+    with pytest.raises(GitHubError, match="Resource not accessible"):
+        github_sync.add_or_find_project_item(client, _project(), "I_1")
+
+
+def test_add_or_find_project_item_errors_when_existing_item_missing():
+    client = FakeClient(add_error=EXISTING_ERROR, items={"I_1": []})
+    with pytest.raises(GitHubError, match="could not be loaded"):
+        github_sync.add_or_find_project_item(client, _project(), "I_1")
+
+
+def test_apply_continues_field_updates_when_item_already_in_project(repo):
+    desired = [d for d in _desired(repo) if d.backlog_id == "EP-01"]
+    issue = ExistingIssue(5, "I_EP01", desired[0].title, desired[0].body, "open")
+    client = FakeClient(add_error=EXISTING_ERROR, items={"I_EP01": [("P_1", "PVTI_existing")]})
+    done = github_sync.apply(client, _project(), desired, {"EP-01": issue}, {})
+    assert any(a.op == "add_to_project" for a in done)
+    assert any(a.op == "set_field" for a in done)
+    assert {u["item"] for u in client.field_updates} == {"PVTI_existing"}

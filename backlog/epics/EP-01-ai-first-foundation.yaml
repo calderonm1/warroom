@@ -147,6 +147,25 @@ features:
           - "`make backlog-sync` completes against the board and the run is linked in ST-01.2.3 agent_notes."
         docs: [tools/README.md]
         depends_on: [ST-01.1.4]
+      - id: ST-01.2.5
+        title: Make GitHub project item add idempotent
+        type: bug
+        status: done
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want backlog-sync to continue when GitHub already has an issue on the
+          board, so that a project auto-add workflow cannot abort a first sync.
+        acceptance_criteria:
+          - Given addProjectV2ItemById returns "Content already exists in this project", when apply runs, then it looks up the existing item id and continues setting fields.
+          - Given a different GraphQL error from addProjectV2ItemById, when apply runs, then it still fails.
+          - Unit tests cover the already-exists path without network access.
+        docs: [tools/README.md]
+        depends_on: [ST-01.2.2]
+        agent_notes: >
+          First live sync (run 39186955484) created EP-01..EP-05 then died on EP-05 because the project's
+          auto-add workflow won the race after create_issue. Add must be idempotent and resolve the existing
+          ProjectV2 item id so set_field can continue.
   - id: FE-01.3
     title: Docs quality and agent tooling
     summary: Automated doc checks, CI for repo checks, manifest validation and MCP configuration for agents.
