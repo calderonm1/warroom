@@ -82,6 +82,7 @@ infra/               Terraform
 | `make docs-check` | Front matter, internal links, and doc index coverage |
 | `make test-tools` | Unit tests for repo tooling |
 | `make doctor` | Report missing or wrong toolchain versions (JSON with `ARGS="--json"`) |
+| `make android-avd` | Create `wr_pixel_api35` and `wr_small_api29` if missing (JSON with `ARGS="--json"`) |
 
 Client, server and infra commands are added to the `Makefile` by their scaffolding stories and documented in [local development](docs/06-environments/local-development.md).
 

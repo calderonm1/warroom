@@ -9,7 +9,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | Milestone | Title | Stories | Done | In progress | Ready | Draft or blocked |
 | --- | --- | --- | --- | --- | --- | --- |
 | M0 | Foundation | 20 | 11 | 1 | 6 | 2 |
-| M1 | Vertical slice | 113 | 0 | 0 | 107 | 6 |
+| M1 | Vertical slice | 113 | 1 | 0 | 106 | 6 |
 | M2 | Core gameplay vs bots | 35 | 0 | 0 | 0 | 35 |
 | M3 | Multiplayer alpha | 16 | 0 | 0 | 0 | 16 |
 | M4 | Closed beta | 18 | 0 | 0 | 0 | 18 |
@@ -22,7 +22,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | Epic | Title | Milestone | Priority | Status | Stories done |
 | --- | --- | --- | --- | --- | --- |
 | [EP-01](epics/EP-01-ai-first-foundation.yaml) | AI-first foundation and repository | M0 | P0 | in-progress | 10/17 |
-| [EP-02](epics/EP-02-dev-environment-and-scaffolding.yaml) | Dev environment and code scaffolding | M1 | P0 | in-progress | 1/19 |
+| [EP-02](epics/EP-02-dev-environment-and-scaffolding.yaml) | Dev environment and code scaffolding | M1 | P0 | in-progress | 2/19 |
 | [EP-03](epics/EP-03-cloud-environments-and-iac.yaml) | Cloud environments and infrastructure as code | M1 | P0 | ready | 0/20 |
 | [EP-04](epics/EP-04-ci-cd.yaml) | CI/CD pipelines | M1 | P0 | ready | 0/12 |
 | [EP-05](epics/EP-05-shared-simulation.yaml) | Shared deterministic simulation | M1 | P0 | ready | 0/20 |
@@ -60,7 +60,6 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | ST-03.1.1 | AWS Organization and member accounts | M1 | P0 | S |
 | ST-07.1.1 | Protobuf contracts with buf | M1 | P0 | S |
 | ST-10.1.1 | Geodata tool project | M1 | P0 | S |
-| ST-02.5.1 | Android emulator profiles script | M1 | P1 | S |
 | ST-04.1.1 | Workflow conventions, caching and concurrency | M1 | P1 | S |
 
 ## EP-01: AI-first foundation and repository
@@ -147,11 +146,11 @@ File: [`epics/EP-02-dev-environment-and-scaffolding.yaml`](epics/EP-02-dev-envir
 | ST-02.4.2 | DevHost with hot reload | feature | ready | P0 | S | M1 | ST-02.2.2, ST-02.4.1 |
 | ST-02.4.3 | Local seed data and dev match fixture | feature | draft | P2 | S | M1 | ST-02.4.2, ST-06.1.3 |
 
-### FE-02.5: Device testing and large files (ready)
+### FE-02.5: Device testing and large files (in-progress)
 
 | Story | Title | Type | Status | Priority | Size | Milestone | Depends on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-02.5.1 | Android emulator profiles script | chore | ready | P1 | S | M1 | - |
+| ST-02.5.1 | Android emulator profiles script | chore | done | P1 | S | M1 | - |
 | ST-02.5.2 | iPhone development build path | chore | ready | P0 | S | M1 | ST-04.2.2 |
 | ST-02.5.3 | Acquire a mid-range reference Android device | chore | draft | P2 | XS | M1 | - |
 | ST-02.5.4 | Git LFS setup and budget monitoring | chore | ready | P1 | S | M1 | ST-01.1.4 |

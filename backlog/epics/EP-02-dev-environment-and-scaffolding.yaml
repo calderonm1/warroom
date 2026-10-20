@@ -275,7 +275,7 @@ features:
       - id: ST-02.5.1
         title: Android emulator profiles script
         type: chore
-        status: ready
+        status: done
         priority: P1
         size: S
         story: >
@@ -286,6 +286,12 @@ features:
           - The device-testing doc lists how to install and launch a development build on each AVD.
         docs: [docs/06-environments/device-testing.md]
         refs: [OQ-009]
+        agent_notes: >
+          `make android-avd` (`wr android-avd`) creates wr_pixel_api35 (device pixel_8, API 35,
+          4096 MB RAM, host GPU) and wr_small_api29 (device small_phone, API 29) only when those
+          names are absent. Arm64 hosts get arm64-v8a Google APIs images; x86_64 hosts get x86_64.
+          Existing AVDs are not rewritten. API 29 follows the device-testing doc; OQ-009 stays open.
+          The target is not part of `make check` because it needs the Android SDK.
       - id: ST-02.5.2
         title: iPhone development build path
         type: chore
