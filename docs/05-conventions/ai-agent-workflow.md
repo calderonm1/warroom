@@ -2,7 +2,7 @@
 title: AI agent workflow
 status: accepted
 owner: engineering
-last_reviewed: 2026-10-19
+last_reviewed: 2026-10-20
 related: [AGENTS.md, ADR-0014, ADR-0018, backlog/README.md]
 ---
 
@@ -34,7 +34,7 @@ This expands [AGENTS.md §4](../../AGENTS.md#4-how-to-pick-up-and-complete-work)
 | CONV-AI-008 | For environment work, read `ops/environments/<env>.yaml` first and obey its `agent_policy`. |
 | CONV-AI-009 | When parallelizing work across multiple agents, assign stories with no dependency edges between them and disjoint `area` labels. |
 | CONV-AI-010 | Factory roles live in `.cursor/skills/supervisor`, `implement-story` and `review-pr`. Agents must not merge PRs. | skills + review |
-| CONV-AI-011 | `.cursor/hooks.json` denies `gh pr merge`, pushes to `main`/`master`, and `terraform apply`/`destroy` (`failClosed`). | hook |
+| CONV-AI-011 | `.cursor/hooks.json` denies `gh pr merge` (including `-R` / `--repo`), any `git push` whose destination ref is `main`/`master` (including `-C`, `+refspec`, quoted refs, `--all`, and `--mirror`), and `terraform apply`/`destroy` (including `-chdir`). `failClosed` is set. | hook |
 
 ## 3. Story readiness (Definition of Ready)
 

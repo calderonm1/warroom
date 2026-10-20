@@ -8,7 +8,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 
 | Milestone | Title | Stories | Done | In progress | Ready | Draft or blocked |
 | --- | --- | --- | --- | --- | --- | --- |
-| M0 | Foundation | 20 | 11 | 1 | 6 | 2 |
+| M0 | Foundation | 21 | 12 | 1 | 6 | 2 |
 | M1 | Vertical slice | 113 | 0 | 0 | 107 | 6 |
 | M2 | Core gameplay vs bots | 35 | 0 | 0 | 0 | 35 |
 | M3 | Multiplayer alpha | 16 | 0 | 0 | 0 | 16 |
@@ -21,7 +21,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 
 | Epic | Title | Milestone | Priority | Status | Stories done |
 | --- | --- | --- | --- | --- | --- |
-| [EP-01](epics/EP-01-ai-first-foundation.yaml) | AI-first foundation and repository | M0 | P0 | in-progress | 10/17 |
+| [EP-01](epics/EP-01-ai-first-foundation.yaml) | AI-first foundation and repository | M0 | P0 | in-progress | 11/18 |
 | [EP-02](epics/EP-02-dev-environment-and-scaffolding.yaml) | Dev environment and code scaffolding | M1 | P0 | in-progress | 1/19 |
 | [EP-03](epics/EP-03-cloud-environments-and-iac.yaml) | Cloud environments and infrastructure as code | M1 | P0 | ready | 0/20 |
 | [EP-04](epics/EP-04-ci-cd.yaml) | CI/CD pipelines | M1 | P0 | ready | 0/12 |
@@ -97,6 +97,7 @@ File: [`epics/EP-01-ai-first-foundation.yaml`](epics/EP-01-ai-first-foundation.y
 | ST-01.3.3 | Configure MCP servers for agents | chore | ready | P1 | S | M0 | ST-01.1.4 |
 | ST-01.3.4 | Environment manifest schema and validator | feature | done | P0 | S | M0 | - |
 | ST-01.3.5 | Agent factory skills and deny hooks | infra | done | P1 | S | M0 | ST-01.3.2 |
+| ST-01.3.6 | Close deny-hook bypasses for merge, push, and terraform | bug | done | P1 | S | M0 | ST-01.3.5 |
 
 ### FE-01.4: Naming, brand and legal identifiers (ready)
 

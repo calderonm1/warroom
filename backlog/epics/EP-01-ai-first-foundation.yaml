@@ -248,6 +248,27 @@ features:
         refs: [CONV-AI-001, CONV-AI-009, CONV-AI-010, CONV-AI-011, CONV-GIT-007]
         depends_on: [ST-01.3.2]
         agent_notes: First slice of the agent factory. Does not enable Cursor Automations or the Cloud Agents SDK.
+      - id: ST-01.3.6
+        title: Close deny-hook bypasses for merge, push, and terraform
+        type: bug
+        status: done
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want the fail-closed shell hook to recognize ordinary flag
+          forms of merge, push to main, and terraform apply, so that an agent cannot bypass it.
+        acceptance_criteria:
+          - "Given git -C, a +refspec, or a quoted ref whose destination is main or master, when the hook runs, then it denies the command."
+          - "Given git push --all or git push --mirror, when the hook runs, then it denies the command."
+          - "Given terraform -chdir apply or destroy, when the hook runs, then it denies the command."
+          - "Given gh -R or gh --repo before pr merge, when the hook runs, then it denies the command."
+          - "Given a feature-branch push, git push origin HEAD, terraform plan, or a commit message that mentions main, when the hook runs, then it allows the command."
+        docs: [docs/05-conventions/ai-agent-workflow.md]
+        refs: [CONV-AI-011, CONV-GIT-007]
+        depends_on: [ST-01.3.5]
+        agent_notes: >
+          The first hook only matched the literal sequences git<space>push, terraform<space>apply,
+          and gh<space>pr<space>merge. git -C, +main, quoted refs, terraform -chdir, and gh -R were allowed.
   - id: FE-01.4
     title: Naming, brand and legal identifiers
     summary: Act on the naming review, reserve store names and fix permanent identifiers.
