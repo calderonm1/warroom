@@ -2,7 +2,7 @@
 title: Security and privacy conventions
 status: accepted
 owner: engineering
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-20
 related: [docs/03-architecture/security-and-anti-cheat.md, ADR-0018]
 ---
 
@@ -10,7 +10,7 @@ related: [docs/03-architecture/security-and-anti-cheat.md, ADR-0018]
 
 | ID | Rule | Enforced by |
 | --- | --- | --- |
-| CONV-SEC-001 | No secrets in the repo. Secret scanning (gitleaks) runs in pre-commit and CI. | gitleaks |
+| CONV-SEC-001 | No secrets in the repo. Secret scanning (gitleaks) runs in pre-commit and CI. | pre-commit: [`.pre-commit-config.yaml`](../../.pre-commit-config.yaml) (ST-02.1.2). CI: ST-04.1.5. |
 | CONV-SEC-002 | Dependencies are pinned (lockfiles: `uv.lock`, `packages.lock.json`, Unity `packages-lock.json`). Dependabot/Renovate updates weekly. | CI |
 | CONV-SEC-003 | New third-party dependency requires a line in the PR: purpose, license, maintenance status. Licenses allowed: MIT, Apache-2.0, BSD, ISC, MPL-2.0, OFL (fonts), Unity Asset Store EULA. GPL/AGPL forbidden in shipped code. | review + license check (`ST-04.1.5`) |
 | CONV-SEC-004 | Validate all client input on the server: schema, ranges, ownership, rate. | tests |

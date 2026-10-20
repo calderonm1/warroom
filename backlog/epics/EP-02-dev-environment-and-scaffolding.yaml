@@ -44,7 +44,7 @@ features:
       - id: ST-02.1.2
         title: Pre-commit hooks for format, lint and secrets
         type: chore
-        status: ready
+        status: done
         priority: P1
         size: S
         story: >
@@ -55,6 +55,12 @@ features:
           - "`make setup` installs the hooks; the hooks are documented in local-development.md."
         docs: [docs/06-environments/local-development.md, docs/05-conventions/security-and-privacy.md]
         depends_on: [ST-02.1.1]
+        agent_notes: >
+          .pre-commit-config.yaml runs ruff (ruff-pre-commit v0.17.1, same as uv.lock), dotnet format
+          on changed C# files only (`wr precommit dotnet-format`, nearest .sln or .csproj), terraform fmt
+          (pre-commit-terraform v1.109.2, Terraform 1.16.6, local binary preferred), and gitleaks 8.30.0
+          (`wr precommit gitleaks`, PATH or a checksum-checked download). make setup runs uv sync --frozen
+          and pre-commit install. CI gitleaks stays ST-04.1.5. CONV-GIT-011 (5 MB LFS check) is out of scope.
       - id: ST-02.1.3
         title: Dev container for server and tooling work
         type: chore

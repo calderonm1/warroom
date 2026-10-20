@@ -8,11 +8,12 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import shutil
 import sys
 from pathlib import Path
 
 from . import backlog as backlog_mod
-from . import docs_check, doctor, github_sync, ops_validate
+from . import docs_check, doctor, github_sync, ops_validate, precommit
 from .common import repo_root
 
 
@@ -134,6 +135,14 @@ def _cmd_ops_validate(root: Path, args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_precommit_dotnet_format(root: Path, args: argparse.Namespace) -> int:
+    return precommit.format_changed_csharp(root, args.files, dotnet=shutil.which("dotnet"))
+
+
+def _cmd_precommit_gitleaks(root: Path, args: argparse.Namespace) -> int:
+    return precommit.run_gitleaks(root)
+
+
 def _cmd_doctor(root: Path, args: argparse.Namespace) -> int:
     report = doctor.diagnose(root)
     if args.json:
@@ -180,6 +189,14 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("doctor", help="check workstation toolchain versions")
     p.add_argument("--json", action="store_true", help="print JSON instead of a table")
     p.set_defaults(func=_cmd_doctor)
+
+    pc = sub.add_parser("precommit", help="commands invoked by .pre-commit-config.yaml").add_subparsers(
+        dest="cmd", required=True
+    )
+    p = pc.add_parser("dotnet-format", help="dotnet format on the given C# files only")
+    p.add_argument("files", nargs="*")
+    p.set_defaults(func=_cmd_precommit_dotnet_format)
+    pc.add_parser("gitleaks", help="scan staged changes for secrets").set_defaults(func=_cmd_precommit_gitleaks)
     return parser
 
 

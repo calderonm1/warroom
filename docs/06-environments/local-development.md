@@ -67,7 +67,7 @@ Windows or Linux works for server, Android and Editor work. iOS builds then need
 ```bash
 git clone <repo> warroom && cd warroom
 git lfs install && git lfs pull
-make setup                # repo tooling (uv sync)
+make setup                # repo tooling (uv sync) and pre-commit hooks (ST-02.1.2)
 make doctor               # missing or wrong toolchain versions (ST-02.1.1)
 make server-setup         # dotnet restore, docker pull     (added by ST-02.2.1)
 make client-setup         # Unity project checks, packages  (added by ST-02.3.1)
@@ -100,3 +100,29 @@ Devices on the same Wi-Fi reach the host's LAN IP. The Android emulator uses `10
 ## 5. Running without cloud credentials
 
 Everything in `local` runs offline: blob storage is the filesystem (`IBlobStore`), remote config is files (`IRemoteConfig`), push is a log sink, IAP is a fake store, and identity is the fake provider. No AWS account is needed to develop gameplay.
+
+## 6. Pre-commit hooks
+
+`make setup` runs `uv sync --frozen` and `pre-commit install`. The hook file is [`.pre-commit-config.yaml`](../../.pre-commit-config.yaml).
+
+| Hook | What it runs | When |
+| --- | --- | --- |
+| `ruff-check` | ruff `0.17.1` with `--fix` (same version as `uv.lock`) | staged Python |
+| `ruff-format` | `ruff format` | staged Python |
+| `dotnet-format` | `dotnet format <nearest .sln or .csproj> --include <changed .cs files>` | staged C# |
+| `terraform_fmt` | `terraform fmt` | staged Terraform |
+| `gitleaks` | `gitleaks git --pre-commit --redact --staged` | every commit |
+
+`dotnet format` walks from each changed `.cs` file toward the repo root and uses the nearest `.sln`, or the nearest `.csproj` when that directory has no solution. A C# file with neither fails the hook. There is no server solution until `ST-02.2.1`, so this hook does not run on the current tree.
+
+`terraform fmt` uses Terraform on `PATH` when it is installed (`--tool-version-mode=prefer-local`). Otherwise the hook downloads Terraform `1.16.6`, the version in `.terraform-version`.
+
+gitleaks uses the `gitleaks` binary on `PATH` when one exists. Otherwise `wr precommit gitleaks` downloads gitleaks `8.30.0` from GitHub releases into `$XDG_CACHE_HOME/warroom/gitleaks` (or `~/.cache/warroom/gitleaks`) and checks the published sha256. CI secret scanning is `ST-04.1.5`.
+
+The first commit after `make setup` also creates the ruff and Terraform hook environments. That download is cached by pre-commit.
+
+```bash
+uv run --frozen pre-commit run --all-files
+```
+
+`git commit --no-verify` skips the hooks. Use it only when a hook is blocked on a missing tool and the change cannot wait.
