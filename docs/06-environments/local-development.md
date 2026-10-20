@@ -69,6 +69,7 @@ git clone <repo> warroom && cd warroom
 git lfs install && git lfs pull
 make setup                # repo tooling (uv sync)
 make doctor               # missing or wrong toolchain versions (ST-02.1.1)
+make android-avd          # wr_pixel_api35 and wr_small_api29 if missing (ST-02.5.1)
 make server-setup         # dotnet restore, docker pull     (added by ST-02.2.1)
 make client-setup         # Unity project checks, packages  (added by ST-02.3.1)
 cp .env.example .env      # local overrides                 (added by ST-02.4.1)

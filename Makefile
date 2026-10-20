@@ -5,7 +5,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 WR := uv run --frozen wr
 
-.PHONY: help setup check lint format test-tools doctor \
+.PHONY: help setup check lint format test-tools doctor android-avd \
 	backlog-validate backlog-index backlog-index-check backlog-next backlog-sync-plan backlog-sync \
 	docs-check docs-stale ops-validate
 
@@ -32,6 +32,9 @@ test-tools: ## Unit tests for repo tooling
 
 doctor: ## Report toolchain versions (table; JSON with ARGS="--json")
 	$(WR) doctor $(ARGS)
+
+android-avd: ## Create wr_pixel_api35 and wr_small_api29 if missing (JSON with ARGS="--json")
+	$(WR) android-avd $(ARGS)
 
 backlog-validate: ## Schema plus referential checks on backlog/
 	$(WR) backlog validate

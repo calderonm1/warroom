@@ -2,8 +2,8 @@
 title: Device testing (iOS, Android, emulators, device farms)
 status: review
 owner: ops
-last_reviewed: 2026-10-18
-related: [docs/03-architecture/globe-rendering.md, EP-02, EP-25]
+last_reviewed: 2026-10-20
+related: [docs/03-architecture/globe-rendering.md, docs/06-environments/local-development.md, EP-02, EP-25, OQ-009]
 ---
 
 # Device testing
@@ -31,14 +31,55 @@ related: [docs/03-architecture/globe-rendering.md, EP-02, EP-25]
 
 Xcode's Simulator runs Unity "Simulator SDK" builds (Player Settings, Target SDK, Simulator). Good for UI and layout across screen sizes. **Not valid for GPU performance.**
 
-## 4. Android emulator (no Android phone yet)
+## 4. Android emulator profiles
 
-1. Android Studio, Device Manager, create AVDs:
-   - `wr_pixel_api35`: Pixel 8 profile, Android 15 (API 35), **arm64-v8a image on Apple Silicon** (x86_64 on Intel/AMD hosts), 4 GB RAM, hardware GLES/Vulkan.
-   - `wr_small_api29`: small phone profile, Android 10 (API 29), min-spec layout checks.
-2. Unity: Android target with **IL2CPP**, ARM64 (+ x86_64 for emulators on x86 hosts). Build and Run with the emulator selected, or `adb install`.
-3. Logs: `adb logcat -s Unity`. Profiling: Unity Profiler (autoconnect) and Android GPU Inspector on physical devices.
-4. Emulators are fine for **functional** testing. Use a physical mid-range device or Device Farm for **performance** sign-off.
+`make android-avd` creates the two AVDs below when those names are missing. It does not change an AVD that already exists. Arm64 hosts (Apple Silicon included) get `arm64-v8a` Google APIs system images. x86_64 hosts get `x86_64` images. The command installs a missing system image and answers `y` to the SDK license prompts that install requires.
+
+API 29 is the proposed Android floor in [open questions](../07-planning/open-questions.md) (OQ-009). That question is still open. `wr_small_api29` tracks the proposal already written in the device matrix.
+
+| AVD | Device id | Image | Use |
+| --- | --- | --- | --- |
+| `wr_pixel_api35` | `pixel_8` | Android 15 (API 35), 4 GB RAM, host GPU (GLES and Vulkan) | reference functional checks |
+| `wr_small_api29` | `small_phone` | Android 10 (API 29) | min-spec layout checks |
+
+Emulators are for **functional** testing and layout. Use a physical mid-range device or Device Farm for **performance** sign-off.
+
+### Install the SDK once
+
+1. Install Android Studio (or the command-line tools) and set `ANDROID_HOME` to the SDK root. `sdkmanager` and `avdmanager` must be on `PATH` or under `$ANDROID_HOME/cmdline-tools/latest/bin`.
+2. Unity Android Build Support (OpenJDK, SDK and NDK) arrives with `ST-02.3.1`. Until that project exists, Android Studio's SDK is enough to create the AVDs.
+
+### Create
+
+```bash
+make android-avd
+make android-avd ARGS="--json"   # one JSON object; exit status is non-zero on failure
+```
+
+A missing SDK prints an error that names this section.
+
+### Launch and install a development build
+
+Reference (`wr_pixel_api35`):
+
+```bash
+emulator -avd wr_pixel_api35
+```
+
+Wait until the home screen is up, then either:
+
+1. Unity: Build Settings, Android, IL2CPP, ARM64 on arm64 hosts (x86_64 on x86 hosts). Select `wr_pixel_api35`. **Build And Run**.
+2. Or install an APK you already built: `adb install -r client/Builds/Android/<name>.apk`, then open the app from the launcher.
+
+Min-spec layout (`wr_small_api29`):
+
+```bash
+emulator -avd wr_small_api29
+```
+
+Use the same install path with this AVD selected. Use it for layout, not GPU performance.
+
+Logs on either AVD: `adb logcat -s Unity`. Profiling: Unity Profiler (autoconnect) and Android GPU Inspector on physical devices.
 
 ## 5. Cloud device farms
 

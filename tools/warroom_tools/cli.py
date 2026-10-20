@@ -11,8 +11,8 @@ import json
 import sys
 from pathlib import Path
 
+from . import android_avd, docs_check, doctor, github_sync, ops_validate
 from . import backlog as backlog_mod
-from . import docs_check, doctor, github_sync, ops_validate
 from .common import repo_root
 
 
@@ -143,6 +143,15 @@ def _cmd_doctor(root: Path, args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_android_avd(_root: Path, args: argparse.Namespace) -> int:
+    report = android_avd.ensure_from_host()
+    if args.json:
+        print(android_avd.to_json(report))
+    else:
+        print(android_avd.to_table(report))
+    return 0 if report.ok else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="wr", description="War Room repo tooling")
     sub = parser.add_subparsers(dest="group", required=True)
@@ -180,6 +189,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("doctor", help="check workstation toolchain versions")
     p.add_argument("--json", action="store_true", help="print JSON instead of a table")
     p.set_defaults(func=_cmd_doctor)
+
+    p = sub.add_parser("android-avd", help="create reference Android emulator profiles if missing")
+    p.add_argument("--json", action="store_true", help="print JSON instead of a table")
+    p.set_defaults(func=_cmd_android_avd)
     return parser
 
 

@@ -21,6 +21,7 @@ make check        # lint, tool tests, docs-check, backlog-validate, index freshn
 | `make docs-stale` | `wr docs stale [--days 180] [--json]` | Docs whose `last_reviewed` is older than the threshold (CONV-DOC-009) |
 | `make ops-validate` | `wr ops validate` | Environment manifests against `ops/environments/schema.json`; prod and staging agent policy guardrails; active environments have no `TBD` values |
 | `make doctor` | `wr doctor [--json]` | Toolchain versions from `global.json`, `.tool-versions`, `.terraform-version` and `.unity-version`. A missing or wrong tool exits non-zero and names `docs/06-environments/local-development.md#1-workstation-prerequisites`. Not part of `make check` |
+| `make android-avd` | `wr android-avd [--json]` | Creates AVDs `wr_pixel_api35` (Pixel 8, API 35, 4 GB, host GPU) and `wr_small_api29` (small phone, API 29) when those names are missing. Arm64 hosts use `arm64-v8a`; x86_64 hosts use `x86_64`. A missing SDK exits non-zero and names `docs/06-environments/device-testing.md#4-android-emulator-profiles`. Not part of `make check` |
 
 Output lines start with `ERROR` or `WARN`, followed by the file and the reason. Commands exit non-zero on failure.
 
