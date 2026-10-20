@@ -21,7 +21,7 @@ features:
       - id: ST-02.1.1
         title: Pin toolchain versions and add make doctor
         type: chore
-        status: ready
+        status: done
         priority: P0
         size: S
         story: >
@@ -32,6 +32,15 @@ features:
           - "`make doctor` checks dotnet, uv, docker, terraform, git-lfs, buf and the Unity editor version, printing a table by default and JSON with `--json`."
           - Given a missing tool, when doctor runs, then it exits non-zero and names the install doc section.
         docs: [docs/06-environments/local-development.md]
+        agent_notes: >
+          Pins are global.json (SDK 10.0.402, rollForward latestFeature so a 10.0.x SDK at or above
+          that version matches), .tool-versions (python 3.12.3 minimum within 3.12, uv 0.13.2,
+          terraform 1.16.6, buf 1.74.0) and .terraform-version (same Terraform version). Node is not
+          a dependency (ADR-0015) and is not pinned; doctor checks it only if a future pin adds it.
+          Unity expects 6000.3.x from .unity-version until client/ProjectSettings/ProjectVersion.txt
+          exists; that exact m_EditorVersion then wins. make doctor is outside make check so CI does
+          not need a full workstation. Failures name
+          docs/06-environments/local-development.md#1-workstation-prerequisites.
       - id: ST-02.1.2
         title: Pre-commit hooks for format, lint and secrets
         type: chore

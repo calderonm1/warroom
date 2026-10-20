@@ -20,6 +20,7 @@ make check        # lint, tool tests, docs-check, backlog-validate, index freshn
 | `make docs-check` | `wr docs check` | Front matter (CONV-DOC-001), index coverage (CONV-DOC-002), relative links and `related` paths (CONV-DOC-003) |
 | `make docs-stale` | `wr docs stale [--days 180] [--json]` | Docs whose `last_reviewed` is older than the threshold (CONV-DOC-009) |
 | `make ops-validate` | `wr ops validate` | Environment manifests against `ops/environments/schema.json`; prod and staging agent policy guardrails; active environments have no `TBD` values |
+| `make doctor` | `wr doctor [--json]` | Toolchain versions from `global.json`, `.tool-versions`, `.terraform-version` and `.unity-version`. A missing or wrong tool exits non-zero and names `docs/06-environments/local-development.md#1-workstation-prerequisites`. Not part of `make check` |
 
 Output lines start with `ERROR` or `WARN`, followed by the file and the reason. Commands exit non-zero on failure.
 

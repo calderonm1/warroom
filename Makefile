@@ -5,7 +5,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 WR := uv run --frozen wr
 
-.PHONY: help setup check lint format test-tools \
+.PHONY: help setup check lint format test-tools doctor \
 	backlog-validate backlog-index backlog-index-check backlog-next backlog-sync-plan backlog-sync \
 	docs-check docs-stale ops-validate
 
@@ -29,6 +29,9 @@ format: ## Auto-format repo tooling
 
 test-tools: ## Unit tests for repo tooling
 	uv run --frozen pytest
+
+doctor: ## Report toolchain versions (table; JSON with ARGS="--json")
+	$(WR) doctor $(ARGS)
 
 backlog-validate: ## Schema plus referential checks on backlog/
 	$(WR) backlog validate

@@ -51,6 +51,7 @@ Prerequisites: `git`, `make`, and [uv](https://docs.astral.sh/uv/) for repo tool
 
 ```bash
 make setup     # install repo tooling (Python, via uv)
+make doctor    # report missing or wrong toolchain versions
 make check     # validate backlog, docs, and the generated index (same as CI)
 make help      # list every task
 ```
