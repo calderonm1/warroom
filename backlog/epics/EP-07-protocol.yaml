@@ -19,7 +19,7 @@ features:
       - id: ST-07.1.1
         title: Protobuf contracts with buf
         type: feature
-        status: ready
+        status: done
         priority: P0
         size: S
         story: >
@@ -31,6 +31,15 @@ features:
           - Naming follows api-and-contracts.md.
         docs: [docs/05-conventions/api-and-contracts.md, docs/03-architecture/networking-and-protocol.md, shared/README.md]
         depends_on: [ST-02.1.1]
+        agent_notes: >
+          Package warroom.realtime.v1. buf.yaml uses STANDARD lint and FILE breaking.
+          make contracts-lint runs buf format --exit-code, buf lint, and buf breaking
+          against main once shared/contracts exists there. MoveArmy is the only typed
+          command (architecture command-flow example); mode is a string because
+          simulation.md names the parameter and does not list values. Snapshot and
+          delta bodies are opaque bytes until simulation serialization exists.
+          Client field 13 and server fields 15-16 are reserved for EP-15 and EP-19.
+          Codegen is ST-07.1.2. The server sends Ping and the client answers Pong (NET-005).
       - id: ST-07.1.2
         title: C# codegen for server and Unity
         type: feature

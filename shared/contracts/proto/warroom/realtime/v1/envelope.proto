@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package warroom.realtime.v1;
+
+import "warroom/realtime/v1/command.proto";
+import "warroom/realtime/v1/error.proto";
+import "warroom/realtime/v1/handshake.proto";
+import "warroom/realtime/v1/update.proto";
+
+option csharp_namespace = "WarRoom.Contracts.Realtime.V1";
+
+// ClientEnvelope is the only client-to-server real-time message (ADR-0006).
+message ClientEnvelope {
+  // Per-connection sequence. The client increases it by one for each send.
+  uint64 client_seq = 1;
+
+  // Field 13 is reserved for ChatSend (EP-15).
+  reserved 13;
+  reserved "chat";
+
+  oneof body {
+    Hello hello = 10;
+    SubscribeMatch subscribe = 11;
+    CommandSubmit command = 12;
+    Pong pong = 14;
+  }
+}
+
+// ServerEnvelope is the only server-to-client real-time message (ADR-0006).
+message ServerEnvelope {
+  // Per-match stream sequence for the body (NET-002). Zero before a match is in scope.
+  uint64 server_seq = 1;
+
+  // Fields 15 and 16 are reserved for chat (EP-15) and notifications (EP-19).
+  reserved 15, 16;
+  reserved "chat", "notification";
+
+  oneof body {
+    Welcome welcome = 10;
+    MatchSnapshot snapshot = 11;
+    StateDelta delta = 12;
+    CommandAck ack = 13;
+    CommandRejected rejected = 14;
+    Ping ping = 17;
+    Error error = 18;
+  }
+}

@@ -9,7 +9,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | Milestone | Title | Stories | Done | In progress | Ready | Draft or blocked |
 | --- | --- | --- | --- | --- | --- | --- |
 | M0 | Foundation | 20 | 11 | 1 | 6 | 2 |
-| M1 | Vertical slice | 113 | 0 | 0 | 107 | 6 |
+| M1 | Vertical slice | 113 | 1 | 0 | 106 | 6 |
 | M2 | Core gameplay vs bots | 35 | 0 | 0 | 0 | 35 |
 | M3 | Multiplayer alpha | 16 | 0 | 0 | 0 | 16 |
 | M4 | Closed beta | 18 | 0 | 0 | 0 | 18 |
@@ -27,7 +27,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | [EP-04](epics/EP-04-ci-cd.yaml) | CI/CD pipelines | M1 | P0 | ready | 0/12 |
 | [EP-05](epics/EP-05-shared-simulation.yaml) | Shared deterministic simulation | M1 | P0 | ready | 0/20 |
 | [EP-06](epics/EP-06-match-runtime.yaml) | Match runtime | M1 | P0 | ready | 0/12 |
-| [EP-07](epics/EP-07-protocol.yaml) | Protocol and contracts | M1 | P0 | ready | 0/7 |
+| [EP-07](epics/EP-07-protocol.yaml) | Protocol and contracts | M1 | P0 | in-progress | 1/7 |
 | [EP-08](epics/EP-08-identity.yaml) | Identity and accounts | M1 | P0 | ready | 0/8 |
 | [EP-09](epics/EP-09-globe-rendering.yaml) | Globe rendering | M1 | P0 | ready | 0/13 |
 | [EP-10](epics/EP-10-geodata-pipeline.yaml) | Geodata and map content pipeline | M1 | P0 | ready | 0/8 |
@@ -58,10 +58,11 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | ST-02.2.1 | .NET solution with Directory.Build.props and analyzers | M1 | P0 | M |
 | ST-02.3.1 | Unity 6 LTS project with URP and core packages | M1 | P0 | M |
 | ST-03.1.1 | AWS Organization and member accounts | M1 | P0 | S |
-| ST-07.1.1 | Protobuf contracts with buf | M1 | P0 | S |
+| ST-07.1.2 | C# codegen for server and Unity | M1 | P0 | S |
 | ST-10.1.1 | Geodata tool project | M1 | P0 | S |
 | ST-02.5.1 | Android emulator profiles script | M1 | P1 | S |
 | ST-04.1.1 | Workflow conventions, caching and concurrency | M1 | P1 | S |
+| ST-07.1.3 | OpenAPI spec for meta and admin APIs | M1 | P1 | S |
 
 ## EP-01: AI-first foundation and repository
 
@@ -350,11 +351,11 @@ Schema-first contracts - Protobuf envelopes over WSS for real-time play and Open
 
 File: [`epics/EP-07-protocol.yaml`](epics/EP-07-protocol.yaml)
 
-### FE-07.1: Contract sources and codegen (ready)
+### FE-07.1: Contract sources and codegen (in-progress)
 
 | Story | Title | Type | Status | Priority | Size | Milestone | Depends on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-07.1.1 | Protobuf contracts with buf | feature | ready | P0 | S | M1 | ST-02.1.1 |
+| ST-07.1.1 | Protobuf contracts with buf | feature | done | P0 | S | M1 | ST-02.1.1 |
 | ST-07.1.2 | C# codegen for server and Unity | feature | ready | P0 | S | M1 | ST-07.1.1 |
 | ST-07.1.3 | OpenAPI spec for meta and admin APIs | feature | ready | P1 | S | M1 | ST-07.1.1 |
 

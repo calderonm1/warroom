@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package warroom.realtime.v1;
+
+option csharp_namespace = "WarRoom.Contracts.Realtime.V1";
+
+// CommandSubmit carries one match command. Retries reuse client_command_id (NET-004).
+message CommandSubmit {
+  // UUIDv7 idempotency key (CONV-API-005).
+  string client_command_id = 1;
+
+  string match_id = 2;
+
+  oneof command {
+    MoveArmy move_army = 10;
+  }
+}
+
+// MoveArmy is the command-flow example. Parameters match simulation.md section 5.
+// path_province_id and target_province_id are alternatives; the server rejects illegal combinations.
+message MoveArmy {
+  // Map-scoped army id (CONV-API-005).
+  uint32 army_id = 1;
+
+  repeated uint32 path_province_id = 2;
+
+  // Set when the client orders a destination instead of a full path.
+  optional uint32 target_province_id = 3;
+
+  // Movement mode token. simulation.md names the parameter and does not list the values.
+  string mode = 4;
+}
+
+// CommandAck is the durable accept result for one command.
+message CommandAck {
+  string client_command_id = 1;
+
+  string match_id = 2;
+
+  // Server sequence of the accepted command on that match stream.
+  uint64 server_seq = 3;
+
+  // Game time of the accept, in milliseconds (NET-008).
+  int64 game_time_ms = 4;
+}
+
+// CommandRejected is the durable reject result for one command.
+message CommandRejected {
+  string client_command_id = 1;
+
+  string match_id = 2;
+
+  // Stable machine-readable code produced by server-side validation.
+  string reason_code = 3;
+}

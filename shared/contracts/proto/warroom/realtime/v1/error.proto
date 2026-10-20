@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package warroom.realtime.v1;
+
+option csharp_namespace = "WarRoom.Contracts.Realtime.V1";
+
+// Error is a terminal or recoverable protocol failure. Codes match NET-009.
+message Error {
+  ErrorCode code = 1;
+
+  // Human-readable detail safe to show in a client. No secrets.
+  string message = 2;
+
+  // Set when the failure is scoped to one match. Empty for connection errors.
+  string match_id = 3;
+}
+
+// ErrorCode maps the WebSocket close codes in NET-009. Unknown values are treated as unspecified.
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_UNAUTHENTICATED = 1;
+  ERROR_CODE_BANNED = 2;
+  ERROR_CODE_TIMEOUT = 3;
+  ERROR_CODE_UPGRADE_REQUIRED = 4;
+  ERROR_CODE_RATE_LIMITED = 5;
+  ERROR_CODE_SERVER_ERROR = 6;
+}
