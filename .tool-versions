@@ -1,0 +1,6 @@
+# asdf / mise pins. Node is intentionally absent (ADR-0015).
+# python: doctor accepts any 3.12 patch greater than or equal to this version.
+python 3.12.3
+uv 0.13.2
+terraform 1.16.6
+buf 1.74.0

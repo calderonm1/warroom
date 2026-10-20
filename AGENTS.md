@@ -81,6 +81,7 @@ infra/               Terraform
 | `make backlog-sync-plan` / `make backlog-sync` | Dry run or apply sync to GitHub Projects |
 | `make docs-check` | Front matter, internal links, and doc index coverage |
 | `make test-tools` | Unit tests for repo tooling |
+| `make doctor` | Report missing or wrong toolchain versions (JSON with `ARGS="--json"`) |
 
 Client, server and infra commands are added to the `Makefile` by their scaffolding stories and documented in [local development](docs/06-environments/local-development.md).
 

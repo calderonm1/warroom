@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from . import backlog as backlog_mod
-from . import docs_check, github_sync, ops_validate
+from . import docs_check, doctor, github_sync, ops_validate
 from .common import repo_root
 
 
@@ -134,6 +134,15 @@ def _cmd_ops_validate(root: Path, args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_doctor(root: Path, args: argparse.Namespace) -> int:
+    report = doctor.diagnose(root)
+    if args.json:
+        print(doctor.to_json(report))
+    else:
+        print(doctor.to_table(report))
+    return 0 if report.ok else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="wr", description="War Room repo tooling")
     sub = parser.add_subparsers(dest="group", required=True)
@@ -167,6 +176,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     op = sub.add_parser("ops", help="environment manifest commands").add_subparsers(dest="cmd", required=True)
     op.add_parser("validate", help="validate ops/environments manifests").set_defaults(func=_cmd_ops_validate)
+
+    p = sub.add_parser("doctor", help="check workstation toolchain versions")
+    p.add_argument("--json", action="store_true", help="print JSON instead of a table")
+    p.set_defaults(func=_cmd_doctor)
     return parser
 
 
