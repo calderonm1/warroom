@@ -37,7 +37,7 @@ infra/               Terraform
 
 ## 4. How to pick up and complete work
 
-1. **Find work.** Run `make backlog-next` or read [`backlog/INDEX.md`](backlog/INDEX.md). Only take stories with `status: ready` whose `depends_on` are all `done`. If asked to do something with no story, create or extend a story first (an S-size story is fine) so the work stays traceable.
+1. **Find work.** Run `make backlog-next` or read [`backlog/INDEX.md`](backlog/INDEX.md). Only take stories with `status: ready` whose `depends_on` are all `done`. If asked to do something with no story, create or extend a story first (an S-size story is fine) so the work stays traceable. Factory roles: [supervisor](.cursor/skills/supervisor/SKILL.md), [implement-story](.cursor/skills/implement-story/SKILL.md), [review-pr](.cursor/skills/review-pr/SKILL.md). Shell hooks in [`.cursor/hooks.json`](.cursor/hooks.json) deny merge, push to `main`, and `terraform apply`.
 2. **Load context.** Read the story, its feature and epic, every path in its `docs:` lists, and the ADRs they reference. Read the relevant conventions doc for the language you will touch.
 3. **Plan.** For M-size or larger stories, write a short plan as a comment in the PR description, or as `agent_notes` on the story, before coding.
 4. **Branch.** Use `<type>/<story-id>-<short-slug>`, for example `feat/ST-05.1.2-command-validation`.

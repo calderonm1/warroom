@@ -230,6 +230,24 @@ features:
           - "`make ops-validate` validates manifests and fails if prod allows agent deploys, infra applies or admin writes."
         docs: [ops/README.md, docs/06-environments/ai-environment-access.md]
         refs: [NFR-OPS-001, ADR-0018]
+      - id: ST-01.3.5
+        title: Agent factory skills and deny hooks
+        type: infra
+        status: done
+        priority: P1
+        size: S
+        story: >
+          As the project owner, I want supervisor, implementer and reviewer skills plus fail-closed shell
+          hooks, so that Cloud Agents cannot merge, force-push main or apply Terraform.
+        acceptance_criteria:
+          - ".cursor/skills/supervisor, implement-story and review-pr each contain a SKILL.md that forbids merging PRs."
+          - ".cursor/hooks.json runs beforeShellExecution fail-closed; the hook denies gh pr merge, force-push to main/master, terraform apply and terraform destroy."
+          - Unit tests cover allow and deny cases without network access.
+          - docs/05-conventions/ai-agent-workflow.md documents the skills and hook.
+        docs: [docs/05-conventions/ai-agent-workflow.md, AGENTS.md]
+        refs: [CONV-AI-001, CONV-AI-009, CONV-AI-010, CONV-AI-011, CONV-GIT-007]
+        depends_on: [ST-01.3.2]
+        agent_notes: First slice of the agent factory. Does not enable Cursor Automations or the Cloud Agents SDK.
   - id: FE-01.4
     title: Naming, brand and legal identifiers
     summary: Act on the naming review, reserve store names and fix permanent identifiers.
