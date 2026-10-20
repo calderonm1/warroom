@@ -1,0 +1,11 @@
+# Protobuf module for War Room contracts (ADR-0006, ST-07.1.1).
+# Lint: CONV-API-002 / CONV-API-004. Breaking: CONV-API-003.
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

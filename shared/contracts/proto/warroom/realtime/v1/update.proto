@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package warroom.realtime.v1;
+
+option csharp_namespace = "WarRoom.Contracts.Realtime.V1";
+
+// MatchSnapshot is the full visible state for one match, sent on subscribe and resync.
+message MatchSnapshot {
+  string match_id = 1;
+
+  // Opaque visible-state bytes. The simulation serialization schema owns the layout.
+  bytes visible_state = 2;
+
+  // Nation-view hash so the client can detect a gap and resync.
+  uint64 view_hash = 3;
+}
+
+// StateDelta is the visible sim events since the previous update for one match.
+message StateDelta {
+  string match_id = 1;
+
+  // Opaque visible-event bytes, filtered by fog of war on the server.
+  bytes visible_events = 2;
+
+  uint64 view_hash = 3;
+}

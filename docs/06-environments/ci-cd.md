@@ -2,7 +2,7 @@
 title: CI/CD pipelines
 status: review
 owner: ops
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-20
 related: [ADR-0017, EP-04, .github/workflows/repo-checks.yml]
 ---
 
@@ -10,7 +10,7 @@ related: [ADR-0017, EP-04, .github/workflows/repo-checks.yml]
 
 | Workflow | Trigger | Jobs | Status |
 | --- | --- | --- | --- |
-| `repo-checks.yml` | every PR and push | backlog validate, index freshness, docs check, ops manifests, tools lint and tests | **live** |
+| `repo-checks.yml` | every PR and push | backlog validate, index freshness, docs check, ops manifests, tools lint and tests, `make contracts-lint` | **live** |
 | `backlog-sync.yml` | push to `main` touching `backlog/**`; manual | sync backlog to GitHub Projects | **live** (needs secrets, see below) |
 | `shared.yml` | changes in `shared/**` | build netstandard2.1, unit, property and golden tests (x64 + arm64), coverage gate | `ST-04.1.2` |
 | `server.yml` | changes in `server/**`, `shared/**` | build, unit, integration (Testcontainers), contract tests, container build, push to ECR on `main` | `ST-04.1.3` |

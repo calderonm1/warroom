@@ -2,7 +2,7 @@
 title: Networking and protocol
 status: accepted
 owner: architecture
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-20
 related: [ADR-0006, EP-07, docs/05-conventions/api-and-contracts.md]
 ---
 
@@ -12,40 +12,31 @@ related: [ADR-0006, EP-07, docs/05-conventions/api-and-contracts.md]
 
 | Channel | Transport | Encoding | Used for |
 | --- | --- | --- | --- |
-| Real-time | WSS `/v1/ws` | Protobuf `ClientEnvelope` / `ServerEnvelope` | commands, acks, state deltas, chat, presence, in-app notifications |
+| Real-time | WSS `/v1/ws` | Protobuf `ClientEnvelope` / `ServerEnvelope` | commands, acks, state deltas. Chat (EP-15) and notifications (EP-19) join this channel later |
 | Meta | HTTPS `/v1/*` | JSON (OpenAPI 3.1) | login, profile, match list, store, settings, telemetry |
 | Content | HTTPS CloudFront | Addressables bundles + signed manifest | maps, art, content pack data |
 
 ## 2. Envelopes
 
-```proto
-// shared/contracts/proto/warroom/net/v1/envelope.proto (sketch)
-message ClientEnvelope {
-  uint64 client_seq = 1;          // per-connection, monotonically increasing
-  oneof body {
-    Hello hello = 10;             // token, client version, last_server_seq per match
-    SubscribeMatch subscribe = 11;
-    CommandSubmit command = 12;   // client_command_id (UUIDv7) + warroom.match.v1.Command
-    ChatSend chat = 13;
-    Ping ping = 14;
-  }
-}
+Package `warroom.realtime.v1` in `shared/contracts/proto/warroom/realtime/v1/`. `make contracts-lint` runs buf format, STANDARD lint and FILE breaking against `main`.
 
-message ServerEnvelope {
-  uint64 server_seq = 1;          // per-match stream sequence (for resync)
-  oneof body {
-    Welcome welcome = 10;         // session info, server time, signed client config
-    MatchSnapshot snapshot = 11;  // full visible state (on subscribe/resync)
-    StateDelta delta = 12;        // SimEvents filtered by visibility
-    CommandAck ack = 13;
-    CommandRejected rejected = 14;
-    ChatMessage chat = 15;
-    Notification notification = 16;
-    Pong pong = 17;
-    Error error = 18;
-  }
-}
-```
+| Message | Direction | Contents |
+| --- | --- | --- |
+| `ClientEnvelope` | client → server | `client_seq` plus one body |
+| `ServerEnvelope` | server → client | `server_seq` plus one body |
+| `Hello` | client | `token`, `client_version`, per-match `last_server_seq` (NET-001, NET-003, NET-007) |
+| `SubscribeMatch` | client | `match_id` |
+| `CommandSubmit` | client | `client_command_id` (UUIDv7) plus one command (NET-004). First command: `MoveArmy` |
+| `Pong` | client | Reply to server `Ping` |
+| `Welcome` | server | `session_id`, `server_time_unix_ms`, `signed_client_config` (NET-008) |
+| `MatchSnapshot` | server | Full visible state for one match, plus `view_hash` |
+| `StateDelta` | server | Visible sim events for one match, plus `view_hash` |
+| `CommandAck` | server | `client_command_id`, `server_seq`, `game_time_ms` |
+| `CommandRejected` | server | `client_command_id`, `reason_code` |
+| `Ping` | server | Keepalive (NET-005) |
+| `Error` | server | Codes in NET-009, including upgrade required |
+
+`ClientEnvelope` field 13 (`chat`) and `ServerEnvelope` fields 15–16 (`chat`, `notification`) are reserved. The server sends `Ping`; the client answers with `Pong` (NET-005). `MoveArmy.mode` is a string: simulation.md names the parameter and does not list the values. Snapshot and delta payloads are opaque bytes until the simulation serialization schema exists.
 
 ## 3. Rules
 

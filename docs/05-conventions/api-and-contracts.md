@@ -2,7 +2,7 @@
 title: API and contract conventions
 status: accepted
 owner: engineering
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-20
 related: [ADR-0006, docs/03-architecture/networking-and-protocol.md]
 ---
 
@@ -11,7 +11,7 @@ related: [ADR-0006, docs/03-architecture/networking-and-protocol.md]
 | ID | Rule | Enforced by |
 | --- | --- | --- |
 | CONV-API-001 | Schema-first: change `.proto` / OpenAPI first, regenerate (`make contracts-gen`), then implement. | CI (generated code drift check) |
-| CONV-API-002 | `buf lint` (DEFAULT rules) and `buf breaking` against `main`. | CI |
+| CONV-API-002 | `buf lint` (STANDARD rules) and `buf breaking` (FILE) against `main`. | `make contracts-lint` (CI: `repo-checks.yml` until `contracts.yml`, ST-04.1.4) |
 | CONV-API-003 | Never reuse or renumber protobuf field numbers. Removed fields become `reserved`. | buf breaking |
 | CONV-API-004 | Every enum has `*_UNSPECIFIED = 0`; receivers treat unknown values safely. | buf lint |
 | CONV-API-005 | IDs on the wire: `string` UUIDs for players/matches; `uint32` for map-scoped IDs (province, nation, army). | review |

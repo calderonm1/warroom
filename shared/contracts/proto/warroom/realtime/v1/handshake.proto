@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package warroom.realtime.v1;
+
+option csharp_namespace = "WarRoom.Contracts.Realtime.V1";
+
+// Hello is the first client message (NET-001). It carries version and resume cursors.
+message Hello {
+  // Session token issued by the meta API. The server authenticates it.
+  string token = 1;
+
+  // Client build version, checked against the minimum supported version (NET-007).
+  string client_version = 2;
+
+  // Last applied server sequence for each match this client wants to resume (NET-003).
+  repeated MatchCursor match_cursors = 3;
+}
+
+// MatchCursor is one match's resume position.
+message MatchCursor {
+  // Match identifier (UUID, CONV-API-005).
+  string match_id = 1;
+
+  uint64 last_server_seq = 2;
+}
+
+// SubscribeMatch joins one match stream (NET-002).
+message SubscribeMatch {
+  string match_id = 1;
+}
+
+// Welcome is the server handshake response.
+message Welcome {
+  // Connection session identifier (UUID).
+  string session_id = 1;
+
+  // Wall-clock anchor so clients compute countdowns locally (NET-008).
+  int64 server_time_unix_ms = 2;
+
+  // Server-signed client config blob. Opaque to this schema.
+  bytes signed_client_config = 3;
+}
+
+// Ping is the server keepalive (NET-005). The client answers with Pong.
+message Ping {}
+
+// Pong answers a server Ping.
+message Pong {}

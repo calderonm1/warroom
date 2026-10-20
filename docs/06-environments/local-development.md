@@ -81,6 +81,7 @@ make dev-up               # Postgres + Valkey in Docker            (ST-02.4.1)
 make server-dev           # DevHost: gateway+silo+workers, hot reload (ST-02.4.2)
 make sim-test             # fast simulation tests                  (ST-05.1.1)
 # Unity: open client/ in Editor → Boot scene → Play (connects to local DevHost)
+make contracts-lint       # buf format, lint, breaking against main when present (ST-07.1.1)
 make check                # before committing
 ```
 

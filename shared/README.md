@@ -1,17 +1,15 @@
 # shared/: code shared by client and server
 
-Not yet scaffolded. Created by stories `ST-05.1.1` (simulation) and `ST-07.1.1` (contracts).
+Contracts for the real-time channel live here (`ST-07.1.1`). The simulation tree is created by `ST-05.1.1`. C# codegen (`buf.gen.yaml`, `make contracts-gen`) is `ST-07.1.2`. OpenAPI is `ST-07.1.3`.
 
 ```
 shared/
-  simulation/
-    WarRoom.Simulation/          netstandard2.1, LangVersion 9, zero dependencies except contracts
-    WarRoom.Simulation.Tests/    xUnit + FsCheck property tests + golden replay tests
+  simulation/                    not yet scaffolded (ST-05.1.1)
   contracts/
-    proto/warroom/<domain>/v1/*.proto    real-time protocol (buf-managed)
-    openapi/meta-api.v1.yaml             meta HTTP API
-    buf.yaml, buf.gen.yaml
-  content-schema/                JSON Schemas for content/ YAML (units, nations, research, maps)
+    proto/warroom/realtime/v1/   ClientEnvelope, ServerEnvelope and bodies
+    buf.yaml                     STANDARD lint, FILE breaking
+    openapi/                     not yet scaffolded (ST-07.1.3)
+  content-schema/                not yet scaffolded
 ```
 
 Hard constraints (see [ADR-0005](../docs/adr/0005-shared-deterministic-simulation.md)):
