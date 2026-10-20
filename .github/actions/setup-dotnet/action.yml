@@ -1,0 +1,51 @@
+name: Setup .NET SDK
+description: Install the .NET SDK pinned in global.json and cache NuGet packages when a project exists.
+
+inputs:
+  cache:
+    description: Cache NuGet packages (true or false). Empty auto-enables when a csproj or packages.lock.json exists.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Decide NuGet cache
+      id: cache
+      shell: bash
+      run: |
+        set -euo pipefail
+        cache_input="${{ inputs.cache }}"
+        case "${cache_input}" in
+          "")
+            ;;
+          true|false)
+            echo "enabled=${cache_input}" >> "${GITHUB_OUTPUT}"
+            exit 0
+            ;;
+          *)
+            echo "cache must be true or false" >&2
+            exit 1
+            ;;
+        esac
+        if find . -path './.git' -prune -o \( -name 'packages.lock.json' -o -name '*.csproj' \) -print -quit | grep -q .; then
+          echo "enabled=true" >> "${GITHUB_OUTPUT}"
+        else
+          echo "enabled=false" >> "${GITHUB_OUTPUT}"
+        fi
+
+    - name: Install .NET SDK with NuGet cache
+      if: steps.cache.outputs.enabled == 'true'
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      with:
+        global-json-file: global.json
+        cache: true
+        cache-dependency-path: |
+          **/*.csproj
+          **/packages.lock.json
+
+    - name: Install .NET SDK
+      if: steps.cache.outputs.enabled != 'true'
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      with:
+        global-json-file: global.json

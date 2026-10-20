@@ -4,7 +4,7 @@ Python 3.12 tooling managed by [uv](https://docs.astral.sh/uv/) ([ADR-0015](../d
 
 ```bash
 make setup        # uv sync (creates .venv from uv.lock)
-make check        # lint, tool tests, docs-check, backlog-validate, index freshness, ops-validate
+make check        # lint, tool tests, docs-check, backlog-validate, index freshness, ops-validate, ci-check
 ```
 
 ## Commands
@@ -21,6 +21,7 @@ make check        # lint, tool tests, docs-check, backlog-validate, index freshn
 | `make docs-stale` | `wr docs stale [--days 180] [--json]` | Docs whose `last_reviewed` is older than the threshold (CONV-DOC-009) |
 | `make ops-validate` | `wr ops validate` | Environment manifests against `ops/environments/schema.json`; prod and staging agent policy guardrails; active environments have no `TBD` values |
 | `make doctor` | `wr doctor [--json]` | Toolchain versions from `global.json`, `.tool-versions`, `.terraform-version` and `.unity-version`. A missing or wrong tool exits non-zero and names `docs/06-environments/local-development.md#1-workstation-prerequisites`. Not part of `make check` |
+| `make ci-check` | `wr ci check` | Workflow `paths` filters, concurrency groups and third-party actions pinned to commit SHAs. Setup composites for dotnet, uv and buf must exist. See [CI/CD](../docs/06-environments/ci-cd.md). |
 
 Output lines start with `ERROR` or `WARN`, followed by the file and the reason. Commands exit non-zero on failure.
 

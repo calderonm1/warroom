@@ -74,7 +74,8 @@ infra/               Terraform
 | --- | --- |
 | `make help` | List all tasks |
 | `make setup` | Install repo tooling |
-| `make check` | Everything CI checks for docs and backlog (run before every commit) |
+| `make check` | Everything CI checks for docs, backlog and workflow conventions (run before every commit) |
+| `make ci-check` | Workflow path filters, concurrency groups and pinned action SHAs |
 | `make backlog-validate` | Schema plus referential checks on `backlog/` |
 | `make backlog-index` | Regenerate `backlog/INDEX.md` |
 | `make backlog-next` | Stories ready to start |

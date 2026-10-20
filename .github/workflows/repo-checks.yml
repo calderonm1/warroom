@@ -2,12 +2,16 @@ name: repo-checks
 
 on:
   pull_request:
+    paths:
+      - "**"
   push:
     branches: [main]
+    paths:
+      - "**"
   workflow_dispatch:
 
 concurrency:
-  group: repo-checks-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -18,12 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           lfs: false
-      - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
+      - name: Setup uv
+        uses: ./.github/actions/setup-uv
       - name: Install tooling
         run: make setup
       - name: Lint tooling
@@ -38,6 +42,8 @@ jobs:
         run: make backlog-index-check
       - name: Environment manifests
         run: make ops-validate
+      - name: Workflow conventions
+        run: make ci-check
       - name: Ready stories (summary)
         if: always()
         run: |

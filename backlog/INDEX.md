@@ -9,7 +9,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | Milestone | Title | Stories | Done | In progress | Ready | Draft or blocked |
 | --- | --- | --- | --- | --- | --- | --- |
 | M0 | Foundation | 20 | 11 | 1 | 6 | 2 |
-| M1 | Vertical slice | 113 | 0 | 0 | 107 | 6 |
+| M1 | Vertical slice | 113 | 1 | 0 | 106 | 6 |
 | M2 | Core gameplay vs bots | 35 | 0 | 0 | 0 | 35 |
 | M3 | Multiplayer alpha | 16 | 0 | 0 | 0 | 16 |
 | M4 | Closed beta | 18 | 0 | 0 | 0 | 18 |
@@ -24,7 +24,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | [EP-01](epics/EP-01-ai-first-foundation.yaml) | AI-first foundation and repository | M0 | P0 | in-progress | 10/17 |
 | [EP-02](epics/EP-02-dev-environment-and-scaffolding.yaml) | Dev environment and code scaffolding | M1 | P0 | in-progress | 1/19 |
 | [EP-03](epics/EP-03-cloud-environments-and-iac.yaml) | Cloud environments and infrastructure as code | M1 | P0 | ready | 0/20 |
-| [EP-04](epics/EP-04-ci-cd.yaml) | CI/CD pipelines | M1 | P0 | ready | 0/12 |
+| [EP-04](epics/EP-04-ci-cd.yaml) | CI/CD pipelines | M1 | P0 | in-progress | 1/12 |
 | [EP-05](epics/EP-05-shared-simulation.yaml) | Shared deterministic simulation | M1 | P0 | ready | 0/20 |
 | [EP-06](epics/EP-06-match-runtime.yaml) | Match runtime | M1 | P0 | ready | 0/12 |
 | [EP-07](epics/EP-07-protocol.yaml) | Protocol and contracts | M1 | P0 | ready | 0/7 |
@@ -61,7 +61,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | ST-07.1.1 | Protobuf contracts with buf | M1 | P0 | S |
 | ST-10.1.1 | Geodata tool project | M1 | P0 | S |
 | ST-02.5.1 | Android emulator profiles script | M1 | P1 | S |
-| ST-04.1.1 | Workflow conventions, caching and concurrency | M1 | P1 | S |
+| ST-04.1.5 | Licence and secret scanning | M1 | P1 | S |
 
 ## EP-01: AI-first foundation and repository
 
@@ -213,11 +213,11 @@ GitHub Actions pipelines for shared code, server, contracts, client builds (Andr
 
 File: [`epics/EP-04-ci-cd.yaml`](epics/EP-04-ci-cd.yaml)
 
-### FE-04.1: Code pipelines (ready)
+### FE-04.1: Code pipelines (in-progress)
 
 | Story | Title | Type | Status | Priority | Size | Milestone | Depends on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-04.1.1 | Workflow conventions, caching and concurrency | infra | ready | P1 | S | M1 | ST-01.3.2 |
+| ST-04.1.1 | Workflow conventions, caching and concurrency | infra | done | P1 | S | M1 | ST-01.3.2 |
 | ST-04.1.2 | Shared simulation pipeline | infra | ready | P0 | S | M1 | ST-05.1.1, ST-04.1.1 |
 | ST-04.1.3 | Server pipeline | infra | ready | P0 | M | M1 | ST-02.2.2, ST-03.5.1, ST-04.1.1 |
 | ST-04.1.4 | Contracts pipeline | infra | ready | P0 | S | M1 | ST-07.1.1, ST-04.1.1 |
