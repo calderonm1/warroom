@@ -2,8 +2,8 @@
 title: Geodata and map content pipeline
 status: accepted
 owner: architecture
-last_reviewed: 2026-10-18
-related: [ADR-0012, ADR-0015, EP-10, docs/02-game-design/map-and-territory.md]
+last_reviewed: 2026-10-20
+related: [ADR-0012, ADR-0021, EP-10, docs/02-game-design/map-and-territory.md, tools/geodata/README.md]
 ---
 
 # Geodata and map content pipeline
@@ -20,13 +20,13 @@ Turn public-domain geographic data into game maps: provinces, sea zones, adjacen
 | Elevation (stylized relief) | NOAA ETOPO / GEBCO | Public domain / free with attribution |
 | Land cover (terrain class) | ESA WorldCover or MODIS (TBD in `ST-10.1.2`) | Check per source |
 
-Pinned source versions and checksums are recorded in `tools/geodata/sources.lock.yaml`.
+Pinned source versions and checksums are recorded in `tools/geodata/sources.lock.yaml`. The file is an empty list until [ST-10.1.2](../../backlog/epics/EP-10-geodata-pipeline.yaml) chooses sources. The pipeline is its own uv project at `tools/geodata` ([ADR-0021](../adr/0021-geodata-uv-project.md)).
 
 ## 3. Stages
 
 | # | Stage | Output |
 | --- | --- | --- |
-| 1 | Fetch and verify sources | `artifacts/geodata/raw/` |
+| 1 | Fetch and verify sources (`make geodata-fetch`) | `artifacts/geodata/raw/<sha256>/<filename>` |
 | 2 | Project, clean and simplify geometry (topology-preserving) | cleaned layers |
 | 3 | **Provinceization**: split or merge admin-1 polygons to a target province count per nation (by area, population and strategic weight); designer overrides in `content/packs/<pack>/maps/<map>/overrides.yaml` | province polygons |
 | 4 | Sea zones from ocean Voronoi seeded by coastal provinces and straits; designer overrides | sea zone polygons |
@@ -45,3 +45,4 @@ Pinned source versions and checksums are recorded in `tools/geodata/sources.lock
 | GEO-003 | Each map has a version. Matches pin the map version. |
 | GEO-004 | Borders are **game borders**: they follow de facto control as of the content pack date, and the game shows a disclaimer. Disputed areas use neutral naming. See the [content sensitivity policy](../02-game-design/content-model.md#sensitivity-policy). |
 | GEO-005 | Target province counts: 16-player regional map 400 to 800; 32-player 800 to 1,500; 64-player world 2,000 to 3,000. |
+| GEO-006 | A download is stored only after its SHA-256 matches `tools/geodata/sources.lock.yaml`. Cache hits are hashed again. URLs and redirects must be HTTPS. The default size cap is 512 MiB unless the entry sets `max_bytes`. |

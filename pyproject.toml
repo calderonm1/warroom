@@ -33,7 +33,7 @@ addopts = "-q"
 line-length = 120
 target-version = "py312"
 src = ["tools"]
-extend-exclude = ["client", "server", "shared", "infra"]
+extend-exclude = ["client", "server", "shared", "infra", "tools/geodata"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]

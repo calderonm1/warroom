@@ -1,0 +1,5 @@
+# Pinned geodata downloads (GEO-006). ST-10.1.2 chooses real sources and fills this list.
+# Each entry: id, version, url (https only), sha256 (lowercase hex), filename.
+# Optional max_bytes overrides the 512 MiB default.
+version: 1
+sources: []

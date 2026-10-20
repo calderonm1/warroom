@@ -1,15 +1,16 @@
 ---
 title: "ADR-0015: Python (managed by uv) for repo tooling and the geodata pipeline"
-status: accepted
+status: superseded
 owner: architecture
-last_reviewed: 2026-10-18
-related: [ADR-0014, docs/03-architecture/geodata-pipeline.md, tools/README.md]
+last_reviewed: 2026-10-20
+related: [ADR-0014, ADR-0021, docs/03-architecture/geodata-pipeline.md, tools/README.md]
 ---
 
 # ADR-0015: Python with uv for repo tooling
 
 - **Date:** 2026-10-18
 - **Deciders:** project owner
+- **Superseded by:** [ADR-0021](0021-geodata-uv-project.md)
 
 ## Context
 

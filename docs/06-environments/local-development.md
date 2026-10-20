@@ -67,7 +67,7 @@ Windows or Linux works for server, Android and Editor work. iOS builds then need
 ```bash
 git clone <repo> warroom && cd warroom
 git lfs install && git lfs pull
-make setup                # repo tooling (uv sync)
+make setup                # repo tooling and tools/geodata (uv sync)
 make doctor               # missing or wrong toolchain versions (ST-02.1.1)
 make server-setup         # dotnet restore, docker pull     (added by ST-02.2.1)
 make client-setup         # Unity project checks, packages  (added by ST-02.3.1)

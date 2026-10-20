@@ -3,9 +3,11 @@
 Python 3.12 tooling managed by [uv](https://docs.astral.sh/uv/) ([ADR-0015](../docs/adr/0015-repo-tooling-python-uv.md)). The package is `tools/warroom_tools` and installs a `wr` command. Use the `make` targets; they are what CI runs.
 
 ```bash
-make setup        # uv sync (creates .venv from uv.lock)
-make check        # lint, tool tests, docs-check, backlog-validate, index freshness, ops-validate
+make setup        # uv sync for this project and for tools/geodata
+make check        # lint, tool tests, geodata lint and tests, docs-check, backlog-validate, index freshness, ops-validate
 ```
+
+The geodata pipeline is a second uv project at [`tools/geodata`](geodata/README.md) ([ADR-0021](../docs/adr/0021-geodata-uv-project.md)). `make geodata-fetch` downloads `sources.lock.yaml` and verifies SHA-256.
 
 ## Commands
 
@@ -21,6 +23,9 @@ make check        # lint, tool tests, docs-check, backlog-validate, index freshn
 | `make docs-stale` | `wr docs stale [--days 180] [--json]` | Docs whose `last_reviewed` is older than the threshold (CONV-DOC-009) |
 | `make ops-validate` | `wr ops validate` | Environment manifests against `ops/environments/schema.json`; prod and staging agent policy guardrails; active environments have no `TBD` values |
 | `make doctor` | `wr doctor [--json]` | Toolchain versions from `global.json`, `.tool-versions`, `.terraform-version` and `.unity-version`. A missing or wrong tool exits non-zero and names `docs/06-environments/local-development.md#1-workstation-prerequisites`. Not part of `make check` |
+| `make geodata-lint` | `ruff` in `tools/geodata` | Lint and format-check the geodata project |
+| `make geodata-test` | `pytest` in `tools/geodata` | Cache and SHA-256 tests (no network) |
+| `make geodata-fetch` | `geodata fetch [--json]` | Download `tools/geodata/sources.lock.yaml` into `artifacts/geodata/raw/<sha256>/` after the digest matches |
 
 Output lines start with `ERROR` or `WARN`, followed by the file and the reason. Commands exit non-zero on failure.
 
