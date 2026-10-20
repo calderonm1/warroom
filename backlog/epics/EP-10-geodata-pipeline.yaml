@@ -19,7 +19,7 @@ features:
       - id: ST-10.1.1
         title: Geodata tool project
         type: chore
-        status: ready
+        status: done
         priority: P0
         size: S
         story: >
@@ -28,8 +28,16 @@ features:
         acceptance_criteria:
           - tools/geodata is a uv project with its own lockfile, ruff and pytest configured.
           - Downloads are cached and verified by SHA-256 against a sources manifest.
-        docs: [docs/03-architecture/geodata-pipeline.md, docs/adr/0015-repo-tooling-python-uv.md]
+        docs: [docs/03-architecture/geodata-pipeline.md, docs/adr/0015-repo-tooling-python-uv.md, docs/adr/0021-geodata-uv-project.md]
         depends_on: [ST-02.1.1]
+        agent_notes: >
+          ADR-0021 supersedes ADR-0015: tools/geodata is its own uv project so GIS
+          dependencies stay out of the repo-tooling venv. sources.lock.yaml is empty
+          until ST-10.1.2; test_committed_manifest_loads_and_starts_empty locks that.
+          make geodata-fetch writes artifacts/geodata/raw/<sha256>/<filename> only after
+          SHA-256 matches (GEO-006). Default max_bytes is 512 MiB and can be raised per
+          source. GIS libraries are not dependencies yet; add them in the stage that
+          needs them. make check runs geodata ruff and pytest.
       - id: ST-10.1.2
         title: Select data sources and licence register
         type: spike

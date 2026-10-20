@@ -2,7 +2,7 @@
 title: Documentation index
 status: accepted
 owner: architecture
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-20
 related: [AGENTS.md, docs/05-conventions/documentation.md]
 ---
 
@@ -124,9 +124,10 @@ Precedence when docs disagree: ADRs > conventions > technical design (TDD) and g
 - [ADR-0012: Custom globe renderer](adr/0012-globe-rendering-custom.md)
 - [ADR-0013: Observability](adr/0013-observability-otel-cloudwatch-sentry.md)
 - [ADR-0014: Backlog as code with GitHub Projects sync](adr/0014-backlog-as-code-github-projects.md)
-- [ADR-0015: Python and uv tooling](adr/0015-repo-tooling-python-uv.md)
+- [ADR-0015: Python and uv tooling (superseded by ADR-0021)](adr/0015-repo-tooling-python-uv.md)
 - [ADR-0016: PostgreSQL, Valkey and S3](adr/0016-data-postgres-valkey-s3.md)
 - [ADR-0017: GitHub Actions, GameCI and fastlane](adr/0017-ci-cd-github-actions.md)
 - [ADR-0018: AI-first environment access](adr/0018-ai-environment-access.md)
 - [ADR-0019: Push notifications via FCM](adr/0019-push-notifications-fcm.md)
 - [ADR-0020: Remote config via AppConfig](adr/0020-liveops-config-appconfig.md)
+- [ADR-0021: Separate uv project for the geodata pipeline](adr/0021-geodata-uv-project.md)

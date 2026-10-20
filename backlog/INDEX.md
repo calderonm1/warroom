@@ -9,7 +9,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | Milestone | Title | Stories | Done | In progress | Ready | Draft or blocked |
 | --- | --- | --- | --- | --- | --- | --- |
 | M0 | Foundation | 20 | 11 | 1 | 6 | 2 |
-| M1 | Vertical slice | 113 | 0 | 0 | 107 | 6 |
+| M1 | Vertical slice | 113 | 1 | 0 | 106 | 6 |
 | M2 | Core gameplay vs bots | 35 | 0 | 0 | 0 | 35 |
 | M3 | Multiplayer alpha | 16 | 0 | 0 | 0 | 16 |
 | M4 | Closed beta | 18 | 0 | 0 | 0 | 18 |
@@ -30,7 +30,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | [EP-07](epics/EP-07-protocol.yaml) | Protocol and contracts | M1 | P0 | ready | 0/7 |
 | [EP-08](epics/EP-08-identity.yaml) | Identity and accounts | M1 | P0 | ready | 0/8 |
 | [EP-09](epics/EP-09-globe-rendering.yaml) | Globe rendering | M1 | P0 | ready | 0/13 |
-| [EP-10](epics/EP-10-geodata-pipeline.yaml) | Geodata and map content pipeline | M1 | P0 | ready | 0/8 |
+| [EP-10](epics/EP-10-geodata-pipeline.yaml) | Geodata and map content pipeline | M1 | P0 | in-progress | 1/8 |
 | [EP-11](epics/EP-11-client-shell-and-design-system.yaml) | Client shell and design system | M1 | P0 | ready | 0/8 |
 | [EP-12](epics/EP-12-economy.yaml) | Economy, buildings and production | M2 | P0 | draft | 0/7 |
 | [EP-13](epics/EP-13-military-and-combat.yaml) | Military, movement and combat | M2 | P0 | draft | 0/9 |
@@ -59,7 +59,7 @@ Source of truth: [`backlog/epics/`](epics/). Format and rules: [README.md](READM
 | ST-02.3.1 | Unity 6 LTS project with URP and core packages | M1 | P0 | M |
 | ST-03.1.1 | AWS Organization and member accounts | M1 | P0 | S |
 | ST-07.1.1 | Protobuf contracts with buf | M1 | P0 | S |
-| ST-10.1.1 | Geodata tool project | M1 | P0 | S |
+| ST-10.1.2 | Select data sources and licence register | M1 | P0 | S |
 | ST-02.5.1 | Android emulator profiles script | M1 | P1 | S |
 | ST-04.1.1 | Workflow conventions, caching and concurrency | M1 | P1 | S |
 
@@ -446,11 +446,11 @@ A reproducible Python pipeline that turns licensed open geodata into provinces, 
 
 File: [`epics/EP-10-geodata-pipeline.yaml`](epics/EP-10-geodata-pipeline.yaml)
 
-### FE-10.1: Pipeline foundation and sources (ready)
+### FE-10.1: Pipeline foundation and sources (in-progress)
 
 | Story | Title | Type | Status | Priority | Size | Milestone | Depends on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ST-10.1.1 | Geodata tool project | chore | ready | P0 | S | M1 | ST-02.1.1 |
+| ST-10.1.1 | Geodata tool project | chore | done | P0 | S | M1 | ST-02.1.1 |
 | ST-10.1.2 | Select data sources and licence register | spike | ready | P0 | S | M1 | ST-10.1.1 |
 
 ### FE-10.2: Provinces and graph (ready)

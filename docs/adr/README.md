@@ -2,7 +2,7 @@
 title: Architecture Decision Records index
 status: accepted
 owner: architecture
-last_reviewed: 2026-10-18
+last_reviewed: 2026-10-20
 related: [ADR-0001]
 ---
 
@@ -26,9 +26,10 @@ Process: [ADR-0001](0001-record-architecture-decisions.md). Template: [0000-temp
 | [0012](0012-globe-rendering-custom.md) | Custom stylized globe renderer | accepted |
 | [0013](0013-observability-otel-cloudwatch-sentry.md) | Observability and analytics | accepted |
 | [0014](0014-backlog-as-code-github-projects.md) | Backlog as code with GitHub Projects sync | accepted |
-| [0015](0015-repo-tooling-python-uv.md) | Python with uv for repo tooling | accepted |
+| [0015](0015-repo-tooling-python-uv.md) | Python with uv for repo tooling | superseded |
 | [0016](0016-data-postgres-valkey-s3.md) | Data storage and event-sourced matches | accepted |
 | [0017](0017-ci-cd-github-actions.md) | CI/CD with GitHub Actions, GameCI and fastlane | accepted |
 | [0018](0018-ai-environment-access.md) | AI-first environment access | accepted |
 | [0019](0019-push-notifications-fcm.md) | Push notifications via FCM | accepted |
 | [0020](0020-liveops-config-appconfig.md) | Remote config via AWS AppConfig | accepted |
+| [0021](0021-geodata-uv-project.md) | Separate uv project for the geodata pipeline | accepted |
