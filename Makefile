@@ -12,9 +12,10 @@ WR := uv run --frozen wr
 help: ## List all tasks
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-setup: ## Install repo tooling (Python via uv)
+setup: ## Install repo tooling (Python via uv) and pre-commit hooks
 	@command -v uv >/dev/null || { echo "uv is required: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	uv sync --frozen
+	uv run --frozen pre-commit install
 
 check: lint test-tools docs-check backlog-validate backlog-index-check ops-validate ## Everything CI checks (run before every commit)
 	@echo "All checks passed."

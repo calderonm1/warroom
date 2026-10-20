@@ -3,7 +3,7 @@
 Python 3.12 tooling managed by [uv](https://docs.astral.sh/uv/) ([ADR-0015](../docs/adr/0015-repo-tooling-python-uv.md)). The package is `tools/warroom_tools` and installs a `wr` command. Use the `make` targets; they are what CI runs.
 
 ```bash
-make setup        # uv sync (creates .venv from uv.lock)
+make setup        # uv sync (creates .venv from uv.lock) and pre-commit install
 make check        # lint, tool tests, docs-check, backlog-validate, index freshness, ops-validate
 ```
 
@@ -21,6 +21,8 @@ make check        # lint, tool tests, docs-check, backlog-validate, index freshn
 | `make docs-stale` | `wr docs stale [--days 180] [--json]` | Docs whose `last_reviewed` is older than the threshold (CONV-DOC-009) |
 | `make ops-validate` | `wr ops validate` | Environment manifests against `ops/environments/schema.json`; prod and staging agent policy guardrails; active environments have no `TBD` values |
 | `make doctor` | `wr doctor [--json]` | Toolchain versions from `global.json`, `.tool-versions`, `.terraform-version` and `.unity-version`. A missing or wrong tool exits non-zero and names `docs/06-environments/local-development.md#1-workstation-prerequisites`. Not part of `make check` |
+| (pre-commit) | `wr precommit dotnet-format [files...]` | `dotnet format` on those C# files only. The nearest `.sln` or `.csproj` is the workspace. Invoked by `.pre-commit-config.yaml` |
+| (pre-commit) | `wr precommit gitleaks` | `gitleaks git --pre-commit --redact --staged`. Uses `gitleaks` on `PATH`, or downloads pinned 8.30.0 and checks its sha256 |
 
 Output lines start with `ERROR` or `WARN`, followed by the file and the reason. Commands exit non-zero on failure.
 

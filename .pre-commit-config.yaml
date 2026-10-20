@@ -1,0 +1,37 @@
+# Installed by `make setup` (`pre-commit install`). See local-development.md section 6.
+minimum_pre_commit_version: "3.5.0"
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1 # matches the ruff version in uv.lock
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        types_or: [python, pyi]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.109.2
+    hooks:
+      - id: terraform_fmt
+        args:
+          # Use the workstation Terraform when it is on PATH. Otherwise download 1.16.6
+          # (the version pinned in .terraform-version).
+          - --hook-config=--tf-path=terraform
+          - --hook-config=--tool-version=1.16.6
+          - --hook-config=--tool-version-mode=prefer-local
+
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format (changed files)
+        entry: uv run --frozen wr precommit dotnet-format
+        language: system
+        files: \.cs$
+        pass_filenames: true
+      - id: gitleaks
+        name: gitleaks
+        entry: uv run --frozen wr precommit gitleaks
+        language: system
+        pass_filenames: false
+        always_run: true

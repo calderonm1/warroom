@@ -73,7 +73,7 @@ infra/               Terraform
 | Command | Purpose |
 | --- | --- |
 | `make help` | List all tasks |
-| `make setup` | Install repo tooling |
+| `make setup` | Install repo tooling and pre-commit hooks |
 | `make check` | Everything CI checks for docs and backlog (run before every commit) |
 | `make backlog-validate` | Schema plus referential checks on `backlog/` |
 | `make backlog-index` | Regenerate `backlog/INDEX.md` |

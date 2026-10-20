@@ -50,7 +50,7 @@ The full index is at [docs/adr/README.md](docs/adr/README.md).
 Prerequisites: `git`, `make`, and [uv](https://docs.astral.sh/uv/) for repo tooling. Client and server prerequisites are listed in [local development](docs/06-environments/local-development.md).
 
 ```bash
-make setup     # install repo tooling (Python, via uv)
+make setup     # install repo tooling (Python, via uv) and pre-commit hooks
 make doctor    # report missing or wrong toolchain versions
 make check     # validate backlog, docs, and the generated index (same as CI)
 make help      # list every task
