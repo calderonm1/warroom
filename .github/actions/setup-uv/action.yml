@@ -1,0 +1,29 @@
+name: Setup uv
+description: Install the uv version pinned in .tool-versions and cache the uv project cache.
+
+inputs:
+  enable-cache:
+    description: Enable the uv cache (true or false).
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Read uv pin
+      id: pin
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="$(awk '$1 == "uv" { print $2; exit }' .tool-versions)"
+        if [ -z "${version}" ]; then
+          echo ".tool-versions has no uv pin" >&2
+          exit 1
+        fi
+        echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      with:
+        version: ${{ steps.pin.outputs.version }}
+        enable-cache: ${{ inputs.enable-cache }}

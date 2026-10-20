@@ -19,7 +19,7 @@ features:
       - id: ST-04.1.1
         title: Workflow conventions, caching and concurrency
         type: infra
-        status: ready
+        status: done
         priority: P1
         size: S
         story: >
@@ -31,6 +31,12 @@ features:
           - ci-cd.md documents the conventions.
         docs: [docs/06-environments/ci-cd.md]
         depends_on: [ST-01.3.2]
+        agent_notes: >
+          Setup composites are .github/actions/setup-dotnet, setup-uv and setup-buf. They read
+          global.json and .tool-versions. Third-party actions are pinned to commit SHAs.
+          repo-checks keeps a "**" path filter so it stays the baseline check. make ci-check
+          enforces path filters, concurrency and pins. backlog-sync does not cancel in-progress
+          runs because it writes to GitHub.
       - id: ST-04.1.2
         title: Shared simulation pipeline
         type: infra

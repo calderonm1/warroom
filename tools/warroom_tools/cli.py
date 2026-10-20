@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from . import backlog as backlog_mod
-from . import docs_check, doctor, github_sync, ops_validate
+from . import ci_check, docs_check, doctor, github_sync, ops_validate
 from .common import repo_root
 
 
@@ -134,6 +134,12 @@ def _cmd_ops_validate(root: Path, args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_ci_check(root: Path, args: argparse.Namespace) -> int:
+    report = ci_check.validate(root)
+    report.print("ci-check")
+    return 0 if report.ok else 1
+
+
 def _cmd_doctor(root: Path, args: argparse.Namespace) -> int:
     report = doctor.diagnose(root)
     if args.json:
@@ -176,6 +182,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     op = sub.add_parser("ops", help="environment manifest commands").add_subparsers(dest="cmd", required=True)
     op.add_parser("validate", help="validate ops/environments manifests").set_defaults(func=_cmd_ops_validate)
+
+    ci = sub.add_parser("ci", help="CI workflow checks").add_subparsers(dest="cmd", required=True)
+    ci.add_parser("check", help="path filters, concurrency groups and pinned action SHAs").set_defaults(
+        func=_cmd_ci_check
+    )
 
     p = sub.add_parser("doctor", help="check workstation toolchain versions")
     p.add_argument("--json", action="store_true", help="print JSON instead of a table")

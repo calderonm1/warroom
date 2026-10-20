@@ -7,7 +7,7 @@ WR := uv run --frozen wr
 
 .PHONY: help setup check lint format test-tools doctor \
 	backlog-validate backlog-index backlog-index-check backlog-next backlog-sync-plan backlog-sync \
-	docs-check docs-stale ops-validate
+	docs-check docs-stale ops-validate ci-check
 
 help: ## List all tasks
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -16,7 +16,7 @@ setup: ## Install repo tooling (Python via uv)
 	@command -v uv >/dev/null || { echo "uv is required: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	uv sync --frozen
 
-check: lint test-tools docs-check backlog-validate backlog-index-check ops-validate ## Everything CI checks (run before every commit)
+check: lint test-tools docs-check backlog-validate backlog-index-check ops-validate ci-check ## Everything CI checks (run before every commit)
 	@echo "All checks passed."
 
 lint: ## Lint and format-check repo tooling
@@ -59,3 +59,6 @@ docs-stale: ## Docs not reviewed in 180 days
 
 ops-validate: ## Validate environment manifests in ops/environments
 	$(WR) ops validate
+
+ci-check: ## Workflow path filters, concurrency and pinned action SHAs
+	$(WR) ci check

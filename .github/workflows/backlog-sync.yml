@@ -12,7 +12,7 @@ on:
         default: true
 
 concurrency:
-  group: backlog-sync
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -29,13 +29,14 @@ jobs:
       WR_PROJECT_OWNER: ${{ vars.WR_PROJECT_OWNER }}
       WR_PROJECT_NUMBER: ${{ vars.WR_PROJECT_NUMBER }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           lfs: false
-      - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-      - run: make setup
+      - name: Setup uv
+        uses: ./.github/actions/setup-uv
+      - name: Install tooling
+        run: make setup
       - name: Validate backlog
         run: make backlog-validate
       - name: Sync (apply)
